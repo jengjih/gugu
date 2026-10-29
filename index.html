@@ -1,54 +1,2915 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>股娃娃</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股娃娃">
-<meta name="application-name" content="股娃娃">
-<meta name="theme-color" content="#BFE7FF">
+<meta name="theme-color" content="#EEF0F6">
 <meta name="robots" content="noindex">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
 <style>
-  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #BFE7FF; color: #1B1E3C;
-         font: 16px/1.6 -apple-system, "PingFang TC", "Noto Sans TC", sans-serif; }
-  .box { max-width: 340px; padding: 24px 16px; text-align: center; }
-  img { width: 120px; height: 120px; border-radius: 27px; image-rendering: pixelated; box-shadow: 4px 4px 0 #1B1E3C; }
-  h1 { font-size: 22px; margin: 16px 0 8px; }
-  ol { text-align: left; padding-left: 1.4em; }
-  #setup { display: none; }
-  a { color: #1B1E3C; }
+:root {
+  color-scheme: light;
+  --page: #EEF0F6; --surface: #FFFFFF; --surface-2: #F3F4F9; --edge: #CDD2E2;
+  --text: #1B1E3C; --text2: #4A4F6E; --muted: #8A8FA8; --grid: #E3E6EF; --axis: #C3C8D8; --border: #DFE2EC;
+  --ink: #1B1E3C; --mint: #3CCBAA; --mint-d: #23977E; --gold: #FFC94A;
+  --accent: #1B1E3C; --accent-soft: #DDE1EE;
+  --hero: #1B1E3C; --hero-dot: rgba(255,255,255,.10); --hero-edge: #0B0D20;
+  --red: #E5484D; --green: #1F9D63;
+  --t1: #2a78d6; --t2: #eb6834; --t3: #1baf7a; --t4: #eda100; --t5: #e87ba4;
+  --radius: 16px;
+  --num: "Jersey 10", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0E1124; --surface: #171B36; --surface-2: #1E2346; --edge: #070917;
+    --text: #EEF0FA; --text2: #B9BDD6; --muted: #7D82A3; --grid: #252A4E; --axis: #333A68; --border: #272C52;
+    --ink: #EEF0FA; --accent: #EEF0FA; --accent-soft: #2A3060;
+    --hero: #0A0C1C; --hero-dot: rgba(255,255,255,.07); --hero-edge: #2A3060;
+    --red: #FF6B6E; --green: #3FCB86;
+    --t1: #3987e5; --t2: #d95926; --t3: #199e70; --t4: #c98500; --t5: #d55181;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0E1124; --surface: #171B36; --surface-2: #1E2346; --edge: #070917;
+  --text: #EEF0FA; --text2: #B9BDD6; --muted: #7D82A3; --grid: #252A4E; --axis: #333A68; --border: #272C52;
+  --ink: #EEF0FA; --accent: #EEF0FA; --accent-soft: #2A3060;
+  --hero: #0A0C1C; --hero-dot: rgba(255,255,255,.07); --hero-edge: #2A3060;
+  --red: #FF6B6E; --green: #3FCB86;
+  --t1: #3987e5; --t2: #d95926; --t3: #199e70; --t4: #c98500; --t5: #d55181;
+}
+:root { --up: var(--red); --down: var(--green); }
+:root[data-updown="green"] { --up: var(--green); --down: var(--red); }
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; }
+body { background: var(--page); color: var(--text); font: 15px/1.55 system-ui, -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+input, select, textarea { font: inherit; color: var(--text); }
+:focus-visible { outline: 3px solid var(--mint); outline-offset: 2px; }
+svg.i { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.num { font-variant-numeric: tabular-nums; }
+.big-num { font-family: var(--num); letter-spacing: .02em; font-weight: 400; }
+.muted { color: var(--muted); }
+.sub { color: var(--text2); }
+.px { image-rendering: pixelated; image-rendering: crisp-edges; }
+.px-corner, .block::before, .block > .face { clip-path: polygon(0 8px, 4px 8px, 4px 4px, 8px 4px, 8px 0, calc(100% - 8px) 0, calc(100% - 8px) 4px, calc(100% - 4px) 4px, calc(100% - 4px) 8px, 100% 8px, 100% calc(100% - 8px), calc(100% - 4px) calc(100% - 8px), calc(100% - 4px) calc(100% - 4px), calc(100% - 8px) calc(100% - 4px), calc(100% - 8px) 100%, 8px 100%, 8px calc(100% - 4px), 4px calc(100% - 4px), 4px calc(100% - 8px), 0 calc(100% - 8px)); }
+
+/* ── 版面 ── */
+.app { min-height: 100vh; }
+.sidebar { display: none; }
+main { max-width: 1120px; min-width: 0; margin: 0 auto; padding: 0 16px calc(104px + env(safe-area-inset-bottom)); }
+.topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 8px; padding: calc(14px + env(safe-area-inset-top)) 0 10px; background: linear-gradient(var(--page) 72%, transparent); }
+.topbar h1 { font-size: 24px; font-weight: 750; margin: 0; flex: 1; letter-spacing: .02em; display: flex; align-items: center; gap: 8px; }
+.topbar h1 img { width: 33px; height: 31px; }
+.icon-btn { width: 40px; height: 40px; display: grid; place-items: center; color: var(--text2); }
+.icon-btn:hover { background: var(--surface-2); }
+.grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
+.card { background: var(--surface); border-radius: var(--radius); padding: 18px; border: 1.5px solid var(--border); box-shadow: 0 5px 0 var(--edge); min-width: 0; position: relative; }
+.card-h { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.card-h h2 { font-size: 16px; font-weight: 700; margin: 0; flex: 1; }
+.card-h .hint { font-size: 13px; color: var(--muted); }
+
+.tabbar { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around; align-items: center;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 2px solid var(--border); }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; color: var(--muted); width: 64px; padding: 3px 0; position: relative; }
+.tab.on { color: var(--text); font-weight: 700; }
+.tab.on::after { content: ""; position: absolute; top: -10px; width: 18px; height: 4px; background: var(--mint); }
+.tab-add { width: 52px; height: 52px; background: var(--ink); color: var(--page); display: grid; place-items: center; box-shadow: 4px 4px 0 var(--mint); transition: transform .08s, box-shadow .08s; }
+.tab-add:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--mint); }
+.tab-add svg.i { width: 26px; height: 26px; stroke-width: 2.4; }
+
+@media (min-width: 960px) {
+  .app { display: grid; grid-template-columns: 232px 1fr; }
+  .sidebar { display: flex; flex-direction: column; gap: 4px; position: sticky; top: 0; height: 100vh; padding: 24px 14px; border-right: 2px solid var(--border); background: var(--surface); }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; padding: 0 10px 20px; }
+  .brand img { width: 44px; height: 42px; }
+  .nav { display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: var(--text2); font-weight: 600; border: 2px solid transparent; }
+  .nav:hover { background: var(--surface-2); }
+  .nav.on { border-color: var(--ink); color: var(--text); box-shadow: 3px 3px 0 var(--mint); }
+  .side-add { margin-top: 14px; justify-content: center; }
+  main { padding: 8px 32px 48px; width: 100%; }
+  .tabbar { display: none; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+  .span2 { grid-column: span 2; }
+  .topbar h1 { font-size: 28px; }
+}
+
+/* ── 有厚度的總資產主卡 ── */
+.block { position: relative; margin-bottom: 6px; }
+.block::before { content: ""; position: absolute; left: 0; right: 0; top: 6px; bottom: -6px; background: var(--hero-edge); }
+.block > .face { position: relative; transition: transform .12s steps(2); }
+.block.gw-pressed > .face { transform: translateY(5px); }
+.hero { background: var(--hero); background-image: radial-gradient(var(--hero-dot) 1px, transparent 1.4px); background-size: 12px 12px; color: #fff; padding: 20px 22px 18px; }
+.hero-top { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: rgba(255,255,255,.66); }
+.hero-num { font-family: var(--num); font-size: clamp(54px, 15vw, 76px); line-height: 1; margin: 10px 0 14px; letter-spacing: .02em; }
+.hero-num small { font-size: 18px; color: rgba(255,255,255,.6); margin-right: 6px; }
+.hero .pill { background: rgba(255,255,255,.12); color: #fff; }
+.hero .up, .hero .down, .hero .flat { color: #fff; }
+.hero-meta { margin-top: 10px; font-size: 12px; color: rgba(255,255,255,.55); }
+
+.pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; font-size: 13px; font-weight: 650; background: var(--surface-2); white-space: nowrap; }
+.pill .sep { opacity: .7; font-weight: 400; }
+.up { color: var(--up); } .down { color: var(--down); } .flat { color: var(--muted); }
+.arrow { font-size: 10px; }
+
+/* ── 今天＋股娃娃舞台 ── */
+.today { padding: 0; overflow: hidden; }
+.stage-wrap { position: relative; }
+.stage { display: block; width: 100%; height: 150px; image-rendering: pixelated; image-rendering: crisp-edges; cursor: pointer; touch-action: pan-y; }
+.today-body { padding: 14px 18px 16px; position: relative; }
+.today-head { display: flex; align-items: baseline; gap: 10px; }
+.today-head h2 { font-size: 16px; font-weight: 700; margin: 0; }
+.today-head span { font-size: 13px; color: var(--muted); }
+.today-main { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 4px 0 0; }
+.today-amt { font-family: var(--num); font-size: clamp(48px, 13vw, 60px); line-height: 1; letter-spacing: .02em; }
+.today-pct { font-family: var(--num); font-size: 26px; }
+.today-msg { margin: 6px 0 0; font-weight: 650; }
+.today-eq { margin: 0; font-size: 14px; color: var(--text2); }
+.contrib { display: grid; gap: 9px; margin-top: 14px; padding-top: 14px; border-top: 1.5px dashed var(--border); }
+.contrib-row { display: grid; grid-template-columns: minmax(64px, 7.5em) 1fr auto; gap: 10px; align-items: center; font-size: 13px; }
+.contrib-row .nm { color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.contrib-row .amt { font-weight: 650; text-align: right; min-width: 92px; }
+.contrib-row .amt small { font-weight: 500; color: var(--muted); margin-left: 4px; }
+.cbar { position: relative; height: 8px; }
+.cbar::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; background: var(--border); }
+.cbar i { position: absolute; top: 0; height: 8px; }
+.today-foot { margin-top: 14px; font-size: 12px; color: var(--muted); }
+
+/* ── 股娃娃：對話框、頁面層、漏雨、訪客 ── */
+.gw-bubble { position: absolute; transform: translateY(-50%); background: #fff; color: #1B1E3C; font-size: 13px; font-weight: 700; padding: 3px 9px; border: 2px solid #1B1E3C; box-shadow: 3px 3px 0 #1B1E3C; white-space: nowrap; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: 2; max-width: 70vw; overflow: hidden; text-overflow: ellipsis; }
+.gw-bubble.on { opacity: 1; }
+.gw-bubble::after { content: ""; position: absolute; left: -8px; top: 50%; margin-top: -4px; width: 6px; height: 8px; background: #1B1E3C; clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+.gw-bubble.left { transform: translate(-100%, -50%); }
+.gw-bubble.left::after { left: auto; right: -8px; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.gw-page-bubble { position: fixed; z-index: 82; }
+.gw-page { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 80; pointer-events: none; image-rendering: pixelated; image-rendering: crisp-edges; }
+.gw-puddle { position: absolute; width: 36px; height: 8px; background: #7FA7D6; opacity: .45; pointer-events: none; animation: gw-dry 25s steps(10) forwards;
+  clip-path: polygon(4px 0, calc(100% - 8px) 0, calc(100% - 8px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% 6px, calc(100% - 4px) 6px, calc(100% - 4px) 100%, 6px 100%, 6px 6px, 0 6px, 0 2px, 4px 2px); }
+@keyframes gw-dry { to { opacity: 0; } }
+.mini { width: 44px; height: 42px; image-rendering: pixelated; image-rendering: crisp-edges; flex: none; }
+.mini.sm { width: 33px; height: 31px; }
+.mini.bob { animation: gw-bob 1s steps(2) infinite; }
+@keyframes gw-bob { 50% { transform: translateY(-2px); } }
+.gw-visitor { position: fixed; z-index: 40; right: 0; bottom: calc(92px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 8px; transform: translateX(110%); transition: transform .5s steps(6); pointer-events: none; }
+.gw-visitor.on { transform: translateX(-6px); pointer-events: auto; }
+.gw-visitor .gw-say { background: #fff; color: #1B1E3C; border: 2px solid #1B1E3C; box-shadow: 3px 3px 0 #1B1E3C; font-size: 13px; font-weight: 700; padding: 4px 10px; max-width: 220px; }
+.gw-visitor img { width: 55px; height: 52px; image-rendering: pixelated; cursor: pointer; }
+@media (min-width: 960px) { .gw-visitor { bottom: 24px; } }
+.peek { display: flex; align-items: center; gap: 10px; margin: -4px 0 14px; }
+.peek .gw-say { position: relative; background: var(--surface); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); font-size: 13px; font-weight: 650; padding: 5px 11px; }
+.peek .gw-say::before { content: ""; position: absolute; left: -8px; top: 50%; margin-top: -4px; width: 6px; height: 8px; background: var(--ink); clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+.explain { width: 34px; height: 32px; display: grid; place-items: center; border: 2px solid transparent; }
+.explain:hover { border-color: var(--border); }
+.explain img { width: 28px; height: 27px; image-rendering: pixelated; }
+
+/* ── 目標：像素進度條 ── */
+.goal-top { display: flex; align-items: flex-end; gap: 14px; }
+.goal-pct { font-family: var(--num); font-size: 52px; line-height: .9; }
+.goal-pct small { font-size: 22px; }
+.pxbar { margin: 14px 0 6px; position: relative; }
+.pxbar .track { height: 16px; background: var(--surface-2); border: 2px solid var(--ink); position: relative; overflow: hidden; }
+.pxbar .fill { position: absolute; left: 0; top: 0; bottom: 0; background: repeating-linear-gradient(90deg, var(--mint) 0 10px, var(--mint-d) 10px 12px); }
+.pxbar .mark { position: absolute; top: -6px; bottom: -6px; width: 3px; background: var(--gold); }
+.pxbar .mark-l { position: absolute; top: -22px; transform: translateX(-50%); font-size: 11px; color: var(--muted); white-space: nowrap; }
+.kv { display: grid; gap: 8px; flex: 1; min-width: 0; margin-top: 12px; }
+.kv div { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.kv .k { color: var(--muted); }
+.kv .v { font-weight: 650; text-align: right; }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; }
+.stat .k { font-size: 13px; color: var(--muted); }
+.stat .v { font-size: 21px; font-weight: 700; }
+.note-box { margin-top: 12px; padding: 12px 14px; background: var(--surface-2); border-left: 4px solid var(--mint); font-size: 13px; color: var(--text2); }
+
+/* ── 圖表 ── */
+.chart { position: relative; height: 220px; }
+.chart.tall { height: 260px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 12px; font-size: 13px; color: var(--text2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; display: inline-block; flex: none; }
+.seg { display: inline-flex; border: 2px solid var(--ink); background: var(--surface); }
+.seg button { padding: 4px 10px; font-size: 13px; color: var(--text2); }
+.seg button + button { border-left: 2px solid var(--ink); }
+.seg button.on { background: var(--ink); color: var(--page); font-weight: 700; }
+.alloc { display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: center; }
+.donut { position: relative; height: 150px; }
+.donut-c { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; pointer-events: none; }
+.donut-c b { font-family: var(--num); font-size: 26px; font-weight: 400; display: block; line-height: 1; }
+.donut-c span { font-size: 12px; color: var(--muted); }
+.alloc-list { display: grid; gap: 10px; }
+.alloc-row { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; font-size: 14px; }
+.alloc-row .p { color: var(--muted); font-size: 13px; min-width: 44px; text-align: right; }
+.alloc-row .a { grid-column: 2 / 4; font-size: 13px; color: var(--text2); margin-top: -8px; }
+
+/* ── 列表 ── */
+.list { display: grid; grid-template-columns: minmax(0, 1fr); }
+.row { display: flex; align-items: center; gap: 12px; padding: 12px 4px; border-top: 1.5px dashed var(--border); text-align: left; width: 100%; }
+.row:first-child { border-top: 0; }
+button.row:hover { background: var(--surface-2); }
+button.row:active { transform: translateY(1px); }
+.row .main { flex: 1; min-width: 0; }
+.row .t { font-weight: 600; }
+.row .s { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .r { text-align: right; }
+.row .r .t { font-weight: 650; }
+.row .s.up { color: var(--up); } .row .s.down { color: var(--down); }
+.group-h { font-size: 12px; color: var(--muted); font-weight: 700; letter-spacing: .04em; padding: 14px 4px 4px; display: flex; align-items: center; gap: 6px; }
+
+.year-h { display: flex; align-items: center; gap: 10px; padding: 20px 4px 10px; }
+.year-h b { font-family: var(--num); font-size: 34px; font-weight: 400; line-height: 1; }
+.year-h .pill { margin-left: auto; }
+.date-badge { width: 58px; flex: none; white-space: nowrap; text-align: center; background: var(--surface-2); border: 2px solid var(--border); padding: 4px 0; line-height: 1.1; }
+.date-badge b { font-family: var(--num); font-size: 24px; font-weight: 400; display: block; }
+.date-badge span { font-size: 10.5px; color: var(--muted); }
+.tag { font-size: 11px; padding: 1px 7px; background: var(--surface-2); color: var(--text2); font-weight: 600; white-space: nowrap; border: 1.5px solid var(--border); }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: right; font-weight: 600; color: var(--muted); font-size: 12px; padding: 6px; border-bottom: 2px solid var(--grid); white-space: nowrap; }
+td { text-align: right; padding: 9px 6px; border-bottom: 1.5px dashed var(--border); white-space: nowrap; font-variant-numeric: tabular-nums; }
+th:first-child, td:first-child { text-align: left; padding-left: 0; }
+th:last-child, td:last-child { padding-right: 0; }
+tr:last-child td { border-bottom: 0; }
+.table-wrap { overflow-x: auto; margin: 0 -2px; }
+
+/* ── 表單 ── */
+.field { display: grid; gap: 6px; margin-bottom: 14px; }
+.field > span { font-size: 13px; color: var(--text2); font-weight: 600; }
+.input { width: 100%; padding: 10px 12px; border: 2px solid var(--border); background: var(--surface); outline: none; border-radius: 0; transition: border-color .1s, box-shadow .1s; }
+.input:focus { border-color: var(--ink); box-shadow: 3px 3px 0 var(--mint); }
+.input.err { border-color: var(--red); }
+textarea.input { min-height: 96px; resize: vertical; }
+.frow { display: grid; grid-template-columns: 1fr 140px; gap: 6px 12px; align-items: center; padding: 11px 0; border-top: 1.5px dashed var(--border); }
+.frow:first-of-type { border-top: 0; }
+.frow .name { font-weight: 600; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.frow .last { font-size: 12px; color: var(--muted); }
+.frow .input { text-align: right; padding: 8px 10px; font-variant-numeric: tabular-nums; }
+.frow .cost-l { font-size: 12px; color: var(--muted); text-align: right; }
+.frow .diff { font-size: 12px; text-align: right; grid-column: 2; margin-top: -2px; }
+.frow .diff:empty { display: none; }
+.frow.closed .name { color: var(--muted); }
+.fgroup + .fgroup { margin-top: 6px; }
+.savebar { position: sticky; bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 10; margin-top: 16px; display: flex; align-items: center; gap: 12px; padding: 12px 14px 12px 18px;
+  background: var(--surface); border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
+.savebar .tot { flex: 1; min-width: 0; }
+.savebar .tot b { font-family: var(--num); font-size: 30px; font-weight: 400; display: block; line-height: 1; }
+.savebar .tot span { font-size: 13px; }
+@media (min-width: 960px) { .savebar { bottom: 16px; } .frow { grid-template-columns: 1fr 180px; } }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-weight: 700; background: var(--surface); color: var(--text); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); transition: transform .08s, box-shadow .08s; }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.btn.primary { background: var(--ink); color: var(--page); box-shadow: 4px 4px 0 var(--mint); }
+.btn.primary:active { box-shadow: 2px 2px 0 var(--mint); }
+.btn.danger { color: var(--red); border-color: var(--red); box-shadow: 3px 3px 0 var(--red); }
+.btn.small { padding: 6px 11px; font-size: 13px; }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.link { color: var(--text); font-size: 14px; font-weight: 650; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; text-decoration-color: var(--mint); }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1.5px dashed var(--border); }
+.switch-row:first-of-type { border-top: 0; }
+
+/* ── 浮層 ── */
+.sheet-bg { position: fixed; inset: 0; z-index: 50; background: rgba(10,12,28,.45); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.sheet-bg.on { opacity: 1; pointer-events: auto; }
+.sheet { position: fixed; z-index: 51; left: 0; right: 0; bottom: 0; max-height: 88vh; overflow-y: auto; background: var(--surface); border-top: 3px solid var(--ink);
+  padding: 10px 18px calc(24px + env(safe-area-inset-bottom)); transform: translateY(102%); transition: transform .26s steps(6); }
+.sheet.on { transform: none; }
+.sheet .grab { width: 40px; height: 4px; background: var(--border); margin: 0 auto 12px; }
+.sheet-h { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.sheet-h h3 { font-size: 19px; margin: 0; flex: 1; }
+@media (min-width: 720px) {
+  .sheet { left: 50%; right: auto; bottom: auto; top: 50%; width: 560px; border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); transform: translate(-50%, -46%); opacity: 0; pointer-events: none; transition: transform .2s steps(4), opacity .2s; padding-bottom: 24px; }
+  .sheet.on { transform: translate(-50%, -50%); opacity: 1; pointer-events: auto; }
+  .sheet .grab { display: none; }
+}
+.toast { position: fixed; z-index: 60; left: 50%; bottom: calc(100px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); opacity: 0; padding: 9px 16px; display: flex; align-items: center; gap: 8px;
+  background: var(--surface); color: var(--text); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); font-size: 14px; font-weight: 650; transition: .2s steps(3); pointer-events: none; max-width: calc(100vw - 32px); }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+.toast img { width: 33px; height: 31px; image-rendering: pixelated; }
+.busy { position: fixed; inset: 0; z-index: 70; display: none; place-items: center; background: rgba(10,12,28,.18); }
+.busy.on { display: grid; }
+.busy img { width: 77px; height: 73px; image-rendering: pixelated; animation: gw-run .3s steps(2) infinite; }
+@keyframes gw-run { 50% { transform: translateY(-3px); } }
+.skel { background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%); background-size: 200% 100%; animation: sh 1.2s steps(8) infinite; border-radius: var(--radius); }
+@keyframes sh { to { background-position: -200% 0; } }
+.empty { text-align: center; padding: 24px 12px; color: var(--muted); display: grid; justify-items: center; gap: 8px; }
+
+
+/* ── 狀態卡 ── */
+.gw-status-h { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
+.gw-status-h img { width: 77px; height: 73px; image-rendering: pixelated; background: var(--surface-2); border: 2px solid var(--border); }
+.gw-status-h b { font-size: 22px; display: block; }
+.gw-status-h span { font-size: 13px; color: var(--muted); }
+.meter { display: grid; grid-template-columns: 3.4em 1fr 2.4em; gap: 10px; align-items: center; font-size: 13px; margin: 8px 0; }
+.meter .track { height: 12px; background: var(--surface-2); border: 2px solid var(--ink); position: relative; }
+.meter .track i { position: absolute; left: 0; top: 0; bottom: 0; }
+.gw-log { margin: 10px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--text2); }
+.gw-log li { padding: 6px 0; border-top: 1.5px dashed var(--border); display: flex; gap: 8px; align-items: center; }
+.gw-log li:first-child { border-top: 0; }
+.gw-log i { width: 8px; height: 12px; flex: none; }
+
+/* ── 資產來源 ── */
+.src-year + .src-year { margin-top: 18px; padding-top: 16px; border-top: 1.5px dashed var(--border); }
+.src-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.src-top b { font-family: var(--num); font-size: 26px; font-weight: 400; }
+.src-sum { font-size: 13px; color: var(--text2); margin: 0 0 10px; }
+.src-row { display: grid; grid-template-columns: 5.5em 1fr auto; gap: 10px; align-items: center; font-size: 13px; margin-top: 7px; }
+.src-row .amt { font-weight: 650; min-width: 84px; text-align: right; }
+
+/* ═════ 全站像素化 ═════ */
+.pi { width: 24px; height: 24px; image-rendering: pixelated; image-rendering: crisp-edges; flex: none; display: inline-block; vertical-align: middle; }
+.tab:not(.on) .pi, .nav:not(.on) .pi { opacity: .5; }
+.btn .pi { margin: -4px 0; }
+.card-h .pi { margin-right: 2px; }
+.group-h .pi { margin-left: -2px; }
+.td-acc { display: inline-flex; align-items: center; gap: 8px; }
+.alloc-row .pi { margin: -2px 0; }
+
+/* 資產配置：20 格血條 */
+.hp-total { display: flex; align-items: baseline; gap: 8px; }
+.hp-total b { font-family: var(--num); font-size: 40px; font-weight: 400; line-height: 1; }
+.hp-total span { font-size: 13px; color: var(--muted); }
+.hpbar { display: grid; grid-template-columns: repeat(20, 1fr); gap: 2px; height: 26px; border: 2px solid var(--ink); padding: 2px; margin: 8px 0 16px; background: var(--surface-2); }
+.hpbar i { display: block; }
+
+/* 紀錄：章節橫幅＋像素日曆 */
+.year-h { background: var(--ink); color: var(--page); padding: 10px 14px; margin: 22px 0 12px; }
+.year-h b { color: var(--page); }
+.year-h .pill { background: rgba(255,255,255,.14); color: var(--page); }
+:root[data-theme="dark"] .year-h .pill { background: rgba(0,0,0,.12); }
+.year-h .pill.up, .year-h .pill.down { color: var(--page); }
+.date-badge { width: 58px; padding: 0 0 4px; background: var(--surface); border: 2px solid var(--ink); }
+.date-badge .m { display: block; background: var(--ink); color: var(--page); font-size: 11px; font-weight: 700; padding: 1px 0; }
+.date-badge b { font-size: 26px; margin-top: 1px; }
+.rec-total { font-family: var(--num); font-size: 27px; font-weight: 400 !important; line-height: 1.05; display: flex; align-items: center; gap: 4px; letter-spacing: .02em; }
+.rec-total .pi { width: 20px; height: 20px; }
+
+/* 彈出視窗：復古視窗標題列 */
+.sheet { padding-top: 0; }
+.sheet .grab { display: none; }
+.sheet-h { background: var(--ink); color: var(--page); margin: 0 -18px 16px; padding: 9px 10px 9px 16px; position: sticky; top: 0; z-index: 2; }
+.sheet-h h3 { color: var(--page); font-size: 17px; }
+.sheet-h .icon-btn { width: 34px; height: 34px; }
+.sheet-h .icon-btn:hover { background: rgba(255,255,255,.14); }
+.sheet-h .tag { background: rgba(255,255,255,.14); color: var(--page); border-color: transparent; }
+.sheet-h .mini { width: 33px; height: 31px; margin: -4px 0; }
+
+/* 一格一格的分段長條 */
+.cbar { height: 10px; }
+.cbar i { height: 10px; -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px); mask-image: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px); }
+
+/* 表格與數字 */
+th { background: var(--surface-2); border-bottom: 2px solid var(--ink); color: var(--text2); }
+.stat .v { font-family: var(--num); font-size: 32px; font-weight: 400; line-height: 1.1; letter-spacing: .02em; }
+.row .r .t.num { font-family: var(--num); font-size: 22px; font-weight: 400; letter-spacing: .02em; }
+.live-dot { display: inline-block; width: 8px; height: 8px; background: var(--up); margin-right: 6px; vertical-align: 1px; animation: gw-blink 1.2s steps(2) infinite; }
+@keyframes gw-blink { 50% { opacity: .25; } }
+/* 市場頁 */
+.anchor { padding: 14px 16px; }
+.anchor .gw-say { font-size: 14px; line-height: 1.5; }
+.sec-h { display: flex; align-items: center; gap: 8px; margin: 22px 2px 12px; }
+.sec-h h2 { font-size: 16px; margin: 0; flex: 1; }
+.sec-h .hint { font-size: 12px; color: var(--muted); }
+.ind-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (min-width: 960px) { .ind-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.ind { padding: 12px 14px; text-align: left; display: grid; gap: 2px; }
+button.ind:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--edge); }
+.ind-n { font-size: 12px; color: var(--muted); font-weight: 600; }
+.ind-v { font-family: var(--num); font-size: 30px; line-height: 1.05; letter-spacing: .02em; }
+.ind-d { font-size: 12px; font-weight: 700; }
+.spark { width: 100%; height: 28px; margin-top: 6px; }
+.news { margin-bottom: 14px; }
+.news.lead { border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--mint); border-radius: 0; }
+.news-cat { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; background: var(--ink); color: var(--page); margin-bottom: 8px; }
+.news h3 { font-size: 16px; line-height: 1.45; margin: 0 0 6px; }
+.news-body { margin: 0; color: var(--text2); line-height: 1.75; font-size: 14px; }
+.news-body.clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.news .link { font-size: 13px; margin-top: 6px; }
+.news-meta { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-top: 10px; font-size: 12px; }
+.ex-row { display: grid; grid-template-columns: 1fr 96px 128px; gap: 8px; margin-bottom: 8px; }
+.ex-row .input { padding: 8px 9px; font-size: 14px; }
+.gw-log b { color: var(--text); }
+.gear-btn.on { color: var(--text); }
+@media (min-width: 960px) { .gear-btn { display: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
-<div class="box">
-  <img src="apple-touch-icon.png" alt="股娃娃">
-  <h1>股娃娃</h1>
-  <div id="go">正在打開…（沒反應請<a id="link" href="#">點這裡</a>）</div>
-  <div id="setup">
-    <p>把股娃娃放到主畫面：</p>
-    <ol>
-      <li>點 Safari 下方的「分享」按鈕（方框加向上箭頭）</li>
-      <li>往下滑，點「加入主畫面」</li>
-      <li>名稱確認是「股娃娃」，點「加入」</li>
-    </ol>
-    <p>之後從主畫面點股娃娃，就會直接打開 App。</p>
-  </div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><img class="px" id="brand-mon" alt="">股娃娃</div>
+    <button class="nav" data-go="home"><span data-icon="home"></span>總覽</button>
+    <button class="nav" data-go="market"><span data-icon="news"></span>市場</button>
+    <button class="nav" data-go="records"><span data-icon="list"></span>紀錄</button>
+    <button class="nav" data-go="analysis"><span data-icon="chart"></span>分析</button>
+    <button class="nav" data-go="settings"><span data-icon="gear"></span>設定</button>
+    <button class="btn primary side-add" data-go="entry"><span data-icon="plus" data-icon-color="inv"></span>記一筆</button>
+  </aside>
+  <main>
+    <header class="topbar">
+      <h1 id="title">股娃娃</h1>
+      <button class="icon-btn" id="btn-eye" title="隱藏／顯示金額"></button>
+      <button class="icon-btn" id="btn-refresh" title="重新整理"><span data-icon="refresh"></span></button>
+      <button class="icon-btn gear-btn" data-go="settings" title="設定" aria-label="設定"><span data-icon="gear"></span></button>
+    </header>
+    <div id="view"></div>
+  </main>
+  <nav class="tabbar">
+    <button class="tab" data-go="home"><span data-icon="home"></span>總覽</button>
+    <button class="tab" data-go="market"><span data-icon="news"></span>市場</button>
+    <button class="tab-add" data-go="entry" aria-label="記一筆"><span data-icon="plus" data-icon-color="inv"></span></button>
+    <button class="tab" data-go="analysis"><span data-icon="chart"></span>分析</button>
+    <button class="tab" data-go="records"><span data-icon="list"></span>紀錄</button>
+  </nav>
 </div>
+<div class="sheet-bg" id="sheet-bg"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+<div class="busy" id="busy"><img id="busy-img" alt="處理中"></div>
+<div class="gw-visitor" id="visitor"><div class="gw-say"></div><img alt="股娃娃，點我回總覽"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 <script>
-  // 正式 App 網址（Apps Script 部署；只有本人帳號能開）
-  var APP = 'https://script.google.com/macros/s/AKfycbyDYlQdwvC1t7l0TJeLgFeVXhRastKPxwJRiw9tUiFqEoCLaHy6kL5c_1qZa7LHubQkmQ/exec';
-  document.getElementById('link').href = APP;
-  if (location.search.indexOf('setup') >= 0) {
-    // 設定模式：顯示教學，並把網址改回不帶 ?setup，這樣加入主畫面後點開會直接轉址
-    history.replaceState(null, '', location.pathname);
-    document.getElementById('go').style.display = 'none';
-    document.getElementById('setup').style.display = 'block';
-  } else {
-    location.replace(APP);
+// ═════════ 股娃娃：像素小舞台、養成家園、破框演出 ═════════
+const GUGU = (() => {
+  const NAME = '股娃娃';
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const FPS = 12, STEP = 1 / FPS;
+
+  // ── 小怪獸本體（16×14）與表情 ──
+  const PAL = { o: '#1B1E3C', b: '#3CCBAA', d: '#23977E', l: '#A6F0DC', w: '#FFFFFF', k: '#1B1E3C', c: '#FF8FA3', y: '#FFC94A', m: '#C2414B' };
+  const BODY = [
+    '....y......y....',
+    '....o......o....',
+    '.....o....o.....',
+    '...oooooooooo...',
+    '..obllbbbbbbbo..',
+    '.oblbbbbbbbbbbo.',
+    '.obbwwbbbbwwbbo.',
+    '.obbwkbbbbwkbbo.',
+    '.obcbbbbbbbbcbo.',
+    '.obbbbbkkbbbbbo.',
+    '.odbbbbbbbbbbdo.',
+    '..oddbbbbbbddo..',
+    '...oooooooooo...',
+    '...oo......oo...',
+  ];
+  const FACES = {
+    idle: {},
+    blink: { 6: '.obbbbbbbbbbbbo.', 7: '.obbkkbbbbkkbbo.' },
+    happy: { 6: '.obbkkbbbbkkbbo.', 7: '.obkbbkbbkbbkbo.', 9: '.obbbbkmmkbbbbo.' },
+    sad: { 6: '.obbkbbbbbbkbbo.', 7: '.obbwkbbbbwkbbo.', 9: '.obbbbbkkbbbbbo.', 10: '.odbbbkbbkbbbdo.' },
+    worry: { 6: '.obkbbbbbbbbkbo.', 7: '.obbwkbbbbwkbbo.', 9: '.obbbbbbbbbbbbo.', 10: '.odbbbkkkkbbbdo.' },
+    tired: { 6: '.obbbbbbbbbbbbo.', 7: '.obbkkbbbbkkbbo.', 9: '.obbbbbbbbbbbbo.', 10: '.odbbbbkkbbbbdo.' },
+    eat: { 6: '.obbkkbbbbkkbbo.', 7: '.obkbbkbbkbbkbo.', 9: '.obbbbkmmkbbbbo.', 10: '.odbbbkmmkbbbdo.' },
+  };
+  const FEET_WALK = '....oo....oo....';
+
+  /** 體型：chubby 圓滾、normal、thin 瘦、flat 餓扁 */
+  function shape(rows, body) {
+    if (body === 'chubby') {
+      const wide = rows.map(r => r.slice(0, 8) + r[7] + r[8] + r.slice(8));
+      return wide.slice(0, 11).concat([wide[10]], wide.slice(11));
+    }
+    if (body === 'thin') return rows.map(r => r.slice(0, 6) + r.slice(7, 9) + r.slice(10));
+    if (body === 'flat') return rows.filter((_, i) => i !== 4 && i !== 5 && i !== 11).map((r, i) => (i === 8 ? r : r));
+    return rows;
   }
+  const cache = {};
+  function monSprite(face, body, walk) {
+    const key = face + body + (walk ? 1 : 0);
+    if (cache[key]) return cache[key];
+    let rows = BODY.map((r, i) => (FACES[face] && FACES[face][i]) || r);
+    if (walk) rows = rows.slice(0, 13).concat([FEET_WALK]);
+    return (cache[key] = shape(rows, body));
+  }
+
+  // ── 道具與家園 ──
+  const COIN = [
+    ['.oooo.', 'oylyyo', 'oylyyo', 'oyyyyo', 'oyyydo', '.oooo.'],
+    ['..ooo.', '.olyyo', '.olyyo', '.oyyyo', '.oyydo', '..ooo.'],
+    ['..oo..', '..ly..', '..ly..', '..yy..', '..yd..', '..oo..'],
+    ['.ooo..', 'oyylo.', 'oyylo.', 'oyyyo.', 'odyyo.', '.ooo..'],
+  ];
+  const COIN_PAL = { o: '#8A5A00', y: '#FFC94A', l: '#FFF1B8', d: '#E3A21A' };
+  const LEAF = [['.ll..', 'lLll.', '.lLll', '..lL.', '...s.'], ['..ll.', '.llLl', 'llLl.', '.Ll..', '.s...']];
+  const LEAF_PAL = { l: '#D99A4E', L: '#9C5F2A', s: '#6B4423' };
+  const HEART = ['.r.r.', 'rrrrr', 'rrrrr', '.rrr.', '..r..'];
+  const HEART_PAL = { r: '#FF5C7A' };
+  const UMBRELLA = ['.....ooooo.....', '...ooUUUUUoo...', '..oUUUUUUUUUo..', '.oUUVUUUUUVUUo.', 'oUUUVUUUUUVUUUo', 'ooooooooooooooo', '.......o.......', '.......o.......', '.......o.......'];
+  const UMB_PAL = { o: '#1B1E3C', U: '#8B7CF6', V: '#6C5CE7' };
+  const FLAME = [['..y..y..', '.yry.yry', '..r...r.'], ['.yy..yy.', '..ry.ry.', '...r..r.']];
+  const FLAME_PAL = { y: '#FFC94A', r: '#FF6B3D' };
+  const FLAG = ['orrrrr.', 'orryrr.', 'orrrrr.', 'o......', 'o......', 'o......', 'o......', 'o......', 'o......', 'o......'];
+  const FLAG_PAL = { o: '#6B4423', r: '#E5484D', y: '#FFC94A' };
+
+  const TREE = [
+    '...ooooo...',
+    '..ohhccco..',
+    '.ohcccccco.',
+    'ohccccccCco',
+    'occcccccCCo',
+    'occCcccCCCo',
+    '.oCCCcCCCo.',
+    '..ooCtCoo..',
+    '....oto....',
+    '....oTo....',
+    '....oto....',
+    '...ootoo...',
+  ];
+  const DEAD_TREE = [
+    '..k..k..k..',
+    '...k.k.k...',
+    'k...kkk...k',
+    '.k...k...k.',
+    '..k..k..k..',
+    '...kkkkk...',
+    '....kkk....',
+    '....kTk....',
+    '....kTk....',
+    '....kTk....',
+    '....kTk....',
+    '...kkTkk...',
+  ];
+  const SAPLING = ['..c..', '.cCc.', 'ccCcc', '..t..', '..t..'];
+  const HUT = [
+    '......oo......',
+    '.....orro.....',
+    '....orrrro....',
+    '...orrRrrro...',
+    '..orrRRRrrro..',
+    '.orrrrrrrrrro.',
+    'oooooooooooooo',
+    '.owwwwwwwwwwo.',
+    '.owwnnwwddwwo.',
+    '.owwnnwwddwwo.',
+    '.oWWWWWWddWWo.',
+    '.oooooooooooo.',
+  ];
+  const HOUSE = [
+    '..............ooo...',
+    '.........oo...oKo...',
+    '........orro..oKo...',
+    '.......orrrro.oKo...',
+    '......orrRrrroooo...',
+    '.....orrRRRrrrrro...',
+    '....orrRRRRRrrrrro..',
+    '...orrrrrrrrrrrrrro.',
+    '..oooooooooooooooooo',
+    '...owwwwwwwwwwwwwwo.',
+    '...ownnwwwwddwwnnwo.',
+    '...ownnwwwwddwwnnwo.',
+    '...owwwwwwwddwwwwwo.',
+    '...oWWWWWWWddWWWWWo.',
+    '...oooooooooooooooo.',
+  ];
+  const FENCE = ['e...e', 'eeeee', 'e...e', 'eeeee'];
+  const FLOWER = ['.f.', 'fyf', '.f.', '.s.'];
+  const FLOWER_WILT = ['...', 'ff.', '.ys', '.s.'];
+  const GRASS = ['.g.', 'gGg'];
+  const SUN = ['..y..', '.yyy.', 'yyyyy', '.yyy.', '..y..'];
+  const MOON = ['.mm.', 'mm..', 'mm..', '.mm.'];
+  const BUTTERFLY = [['y.y', '.o.'], ['.y.', 'yoy']];
+
+  // ── 華麗等級：程式產生的建築，確保每列寬度一致 ──
+  function building(w, floors, fancy) {
+    const rows = [], half = w / 2, roofH = Math.max(4, Math.round(w / 4));
+    for (let i = 0; i < roofH; i++) {
+      const span = Math.round(((i + 1) / roofH) * half);
+      let row = '';
+      for (let x = 0; x < w; x++) {
+        const dx = x < half ? Math.floor(half) - 1 - x : x - Math.ceil(half);
+        row += dx >= span ? '.' : dx === span - 1 ? 'o' : i % 2 ? 'R' : 'r';
+      }
+      rows.push(row);
+    }
+    rows.push('o'.repeat(w));
+    const mid = (w - 1) / 2;
+    for (let f = floors - 1; f >= 0; f--) {
+      for (let j = 0; j < 4; j++) {
+        let row = '';
+        for (let x = 0; x < w; x++) {
+          if (x === 0 || x === w - 1) { row += 'o'; continue; }
+          const door = f === 0 && Math.abs(x - mid) < 1.1 && j >= 1;
+          const nearDoor = f === 0 && Math.abs(x - mid) < 3;
+          const win = !door && !nearDoor && j >= 1 && j <= 2 && x > 1 && x < w - 2 && (x - 2) % 5 < 2;
+          row += door ? 'd' : win ? 'n' : j === 3 ? 'W' : 'w';
+        }
+        rows.push(row);
+      }
+      if (f > 0) rows.push(fancy ? 'o' + 'y'.repeat(w - 2) + 'o' : 'o'.repeat(w));
+    }
+    rows.push('o'.repeat(w));
+    return rows;
+  }
+  function castle() {
+    const w = 34, h = 24, rows = [], mid = (w - 1) / 2;
+    for (let y = 0; y < h; y++) {
+      let row = '';
+      for (let x = 0; x < w; x++) {
+        const tower = x < 7 || x >= w - 7, tx = x < 7 ? x : x - (w - 7), top = tower ? 4 : 10;
+        let ch = '.';
+        if (y >= top) {
+          if (y === top) ch = (tower ? tx : x) % 2 === 0 ? 'o' : '.';
+          else if (y === top + 1) ch = 'o';
+          else {
+            const edge = x === 0 || x === w - 1 || (tower && (tx === 0 || tx === 6)) || y === h - 1;
+            const gate = !tower && Math.abs(x - mid) <= 3 && y >= h - 7;
+            const win = (tower && tx === 3 && (y === top + 5 || y === top + 6 || y === top + 11 || y === top + 12)) || (!tower && (y === 14 || y === 15) && x % 6 === 2 && Math.abs(x - mid) > 4);
+            ch = edge ? 'o' : gate ? (y === h - 7 ? 'o' : 'd') : win ? 'n' : (y + (x >> 2)) % 5 === 0 && x % 4 === 1 ? 'W' : 'w';
+          }
+        }
+        if (y < 4 && (x === 3 || x === w - 4)) ch = 'o';
+        if (y < 2 && (x === 4 || x === 5 || x === w - 3 || x === w - 2)) ch = 'r';
+        row += ch;
+      }
+      rows.push(row);
+    }
+    return rows;
+  }
+  const VILLA = building(22, 2, true);
+  const MANSION = building(28, 3, true);
+  const CASTLE = castle();
+  const FOUNTAIN = [
+    '......n......',
+    '.....nmn.....',
+    '......n......',
+    '.....oso.....',
+    '......s......',
+    '..ooooooooo..',
+    '.osnnnnnnnso.',
+    'ossssssssssso',
+    '.ooooooooooo.',
+  ];
+  const LAMP = ['.y.', 'oyo', '.o.', '.o.', '.o.', '.o.', '.o.', 'ooo'];
+  const PEDESTAL = ['.oooooooooooooooo.', 'osssssssssssssssso', 'oSSSSSSSSSSSSSSSSo', 'oooooooooooooooooo'];
+  const GOLD = { o: '#8A5A00', b: '#FFC94A', d: '#E3A21A', l: '#FFF1B8', w: '#FFF1B8', k: '#8A5A00', c: '#FFD27A', y: '#FFFFFF', m: '#B8860B' };
+  const MINI_FLAG = ['oFFF', 'oFFF', 'oFF.', 'o...', 'o...', 'o...', 'o...'];
+
+  const HP = {
+    o: '#1B1E3C', h: '#86D58F', c: '#4FB06A', C: '#2F8A4E', t: '#8B5A2B', T: '#6B4423', k: '#9C7B52',
+    w: '#F3E3C3', W: '#D9C29A', r: '#E5484D', R: '#B8333A', K: '#9A4A3A', d: '#8B5A2B', n: '#8ED1FF',
+    e: '#E8D5B0', g: '#5FBF73', G: '#3E9A57', s: '#3E9A57', y: '#FFC94A', m: '#FFF1B8',
+  };
+  const STONE = Object.assign({}, HP, { s: '#C9CEDF', S: '#A9AEC4', n: '#6FB7FF', m: '#FFFFFF' });
+  const CASTLE_PAL = Object.assign({}, HP, { w: '#DDE1EC', W: '#B9BED6', d: '#6B4423', n: '#FFD84A' });
+  const WILT_PAL = Object.assign({}, HP, { h: '#D8C46A', c: '#C9B04A', C: '#9C8A3A', g: '#BFA56A', G: '#9C8456', s: '#8C7A4A' });
+  const FLOWER_COLORS = ['#FF8FA3', '#FFC94A', '#8B7CF6', '#FF6B6E', '#FFFFFF'];
+
+  function cloudShape(w, h) {
+    const circles = [[.22, .62, .26], [.42, .4, .34], [.64, .5, .3], [.82, .66, .2]];
+    const inside = (x, y) => y >= 0 && y < h && circles.some(([cx, cy, r]) => Math.pow((x - cx * w) / (r * w), 2) + Math.pow((y - cy * h * 1.6) / (r * w), 2) <= 1);
+    const rows = [];
+    for (let y = 0; y < h; y++) {
+      let row = '';
+      for (let x = 0; x < w; x++) {
+        if (!inside(x, y)) { row += '.'; continue; }
+        row += !inside(x - 1, y) || !inside(x + 1, y) || !inside(x, y - 1) || !inside(x, y + 1) ? 'o' : y > h * 0.62 ? 'G' : 'g';
+      }
+      rows.push(row);
+    }
+    return rows;
+  }
+  const TUMBLE = (() => {
+    const n = 11, g = [];
+    let seed = 7;
+    const r = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    for (let y = 0; y < n; y++) {
+      let row = '';
+      for (let x = 0; x < n; x++) { const dx = x - 5, dy = y - 5, d = Math.sqrt(dx * dx + dy * dy); row += d <= 5.2 && (d > 4.2 || r() < 0.42) ? 't' : '.'; }
+      g.push(row);
+    }
+    const rot = m => m[0].split('').map((_, x) => m.map(rr => rr[x]).reverse().join(''));
+    const f = [g];
+    for (let i = 0; i < 3; i++) f.push(rot(f[i]));
+    return f;
+  })();
+
+  function spr(ctx, rows, x, y, pal, flip) {
+    x = Math.round(x); y = Math.round(y);
+    const w = rows[0].length;
+    for (let j = 0; j < rows.length; j++) {
+      const r = rows[j];
+      for (let i = 0; i < w; i++) {
+        const ch = r[i];
+        if (ch === '.' || !pal[ch]) continue;
+        ctx.fillStyle = pal[ch];
+        ctx.fillRect(flip ? x + w - 1 - i : x + i, y + j, 1, 1);
+      }
+    }
+  }
+  const dot = (ctx, x, y, c, s) => { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), s || 1, s || 1); };
+  function plus(ctx, x, y, c, big) {
+    x = Math.round(x); y = Math.round(y); ctx.fillStyle = c; ctx.fillRect(x, y, 1, 1);
+    for (let i = 1; i <= (big ? 2 : 1); i++) { ctx.fillRect(x - i, y, 1, 1); ctx.fillRect(x + i, y, 1, 1); ctx.fillRect(x, y - i, 1, 1); ctx.fillRect(x, y + i, 1, 1); }
+  }
+  function seeded(seed) { return () => (seed = (seed * 9301 + 49297) % 233280) / 233280; }
+  const cssVar = (v, d) => (getComputedStyle(document.documentElement).getPropertyValue(v).trim() || d);
+
+  // ═════════ 養成狀態：全部由資料推算 ═════════
+  const LEVELS = [
+    [0, '空地'], [500000, '草地'], [1000000, '花圃'], [1500000, '小樹林'], [2000000, '小屋'], [2500000, '房子'], [3000000, '有圍籬的家'],
+    [3500000, '噴泉花園'], [4000000, '兩層洋房'], [5000000, '黃金雕像'], [7000000, '莊園'], [10000000, '城堡'],
+  ];
+  /**
+   * input: { ath 歷史最高總資產, saved: [最近幾段記帳區間自己存的錢], daysSinceRecord, streak 連漲(+)/連跌(-)天數,
+   *          care: { daysAway 幾天沒打開, petsToday 今天摸了幾次 } }
+   */
+  function computeState(input) {
+    const lvl = LEVELS.reduce((n, l, i) => (input.ath >= l[0] ? i : n), 0);
+    const recent = (input.saved || []).slice(-3);
+    let lush = recent.filter(v => v > 0).length; // 0..3
+    if (input.daysSinceRecord > 45) lush = Math.max(0, lush - 2);
+    const st = input.streak || 0;
+    const wilt = clamp((st <= -2 ? -st - 1 : 0) + (lush === 0 ? 1 : 0), 0, 3);
+    const weather = st >= 3 ? 'sunny' : st >= 0 ? 'clear' : st === -1 ? 'cloudy' : st >= -3 ? 'rain' : 'storm';
+    const care = input.care || {};
+    const away = care.daysAway || 0;
+    const fullness = clamp(30 + lush * 20 + (input.daysSinceRecord <= 30 ? 10 : -20) + (st > 0 ? 5 : 0), 0, 100);
+    let mood = 55 + clamp(st, -5, 5) * 7 + Math.min(3, care.petsToday || 0) * 8 - Math.min(away, 7) * 4;
+    mood = clamp(mood, 0, 100);
+    const body = st <= -4 || fullness < 20 ? 'flat' : st <= -2 || fullness < 40 ? 'thin' : st >= 3 && fullness >= 70 ? 'chubby' : 'normal';
+    return { level: lvl, levelName: LEVELS[lvl][1], nextLevel: LEVELS[lvl + 1] || null, lush, wilt, weather, body, mood, fullness, streak: st, lonely: away >= 3, away };
+  }
+
+  // ═════════ 紀念旗：從歷史資料推算成就 ═════════
+  const FLAG_COLORS = { milestone: '#FFC94A', goal: '#E5484D', challenge: '#8B7CF6', profit: '#3CCBAA', saver: '#FF8FA3' };
+  /**
+   * 只紀念「資產每突破 50 萬」。input: { points: [{ date, total }]（依日期排序，可含記帳與每日估算）, today }
+   */
+  function achievements(input) {
+    const out = [], pts = input.points || [];
+    let best = 0;
+    pts.forEach(p => {
+      while (p.total >= best + 500000) {
+        best += 500000;
+        const label = best === 1000000 ? '第一桶金！資產突破 100 萬' : '資產突破 ' + (best >= 1e8 ? best / 1e8 + ' 億' : best / 1e4 + ' 萬');
+        out.push({ id: 'm' + best, kind: 'milestone', label, date: p.date, amount: best });
+      }
+    });
+    const today = input.today || '';
+    return out.map(f => Object.assign(f, { color: FLAG_COLORS.milestone, fresh: today && f.date >= today }));
+  }
+
+  // ═════════ 舞台 ═════════
+  /**
+   * opts: { bubble: 舞台對話框元素, page: PageLayer, heroEl(): 主卡元素, leakEl(): 漏雨落點元素,
+   *         onLongPress(), onTap() }
+   */
+  function Stage(canvas, opts) {
+    opts = opts || {};
+    const ctx = canvas.getContext('2d');
+    const S = {
+      W: 80, H: 34, WW: 160, pan: 0, tilt: 0, tiltT: 0, scroll: 0, theme: 'light', tick: 0, t: 0, scene: null, parts: [], clouds: [], stars: [], hills: [],
+      flash: 0, rain: 0, darkCloud: null, leafOnHead: false, flag: false, flagOnHero: false, last: 0, acc: 0, raf: 0,
+      state: computeState({ ath: 0, saved: [], streak: 0 }), items: [], seed: 11,
+      mon: { wx: 72, y: 0, face: 'idle', flip: false, prop: null, out: false, walkTo: null, walk: false, sit: false },
+      talkUntil: 0, flags: [],
+      today: { dir: 0, lv: 0 }, // 今天的漲跌氣氛：dir 1 漲／-1 跌／0 持平，lv 0 小、1 中、2 大
+    };
+    const groundY = () => S.H - 5;
+    const home = () => Math.round(S.WW * 0.46);
+
+    function resize() {
+      const r = canvas.getBoundingClientRect();
+      S.W = Math.max(48, Math.round((r.width || 320) / 4));
+      S.WW = Math.round(S.W * (S.state.level >= 7 ? 2.6 : 2));
+      canvas.width = S.W; canvas.height = S.H;
+      const r2 = seeded(5);
+      S.clouds = [0, 1, 2, 3].map(() => ({ x: r2() * S.WW, y: 2 + r2() * 8, w: Math.round(7 + r2() * 6), v: 0.6 + r2() * 0.8 }));
+      S.stars = Array.from({ length: Math.round(S.W / 4) }, () => ({ x: Math.floor(r2() * S.W * 1.4), y: Math.floor(r2() * (groundY() - 8)), ph: r2() * 6 }));
+      S.hills = [];
+      let h = 6;
+      for (let x = 0; x < S.WW * 0.7 + S.W; x++) { if (x % 3 === 0) h = clamp(h + Math.round(r2() * 2 - 1), 3, 10); S.hills.push(h); }
+      layout();
+      if (!S.mon.walkTo) S.mon.wx = home();
+      S.pan = clamp(S.mon.wx + 8 - S.W / 2, 0, S.WW - S.W);
+    }
+
+    // 家園物件依等級、茂盛度擺放（位置固定不亂跳）
+    function layout() {
+      const st = S.state, r = seeded(S.seed), items = [];
+      const g = groundY();
+      const house = Math.round(S.WW * 0.6);
+      const main = st.level >= 11 ? { s: CASTLE, pal: CASTLE_PAL, dx: -6, smoke: false } : st.level >= 10 ? { s: MANSION, dx: -4, smoke: true, chim: 20 } : st.level >= 8 ? { s: VILLA, dx: -1, smoke: true, chim: 16 } :
+        st.level >= 5 ? { s: HOUSE, dx: 0, smoke: true, chim: 15 } : st.level >= 4 ? { s: HUT, dx: 3, smoke: false } : null;
+      if (main) items.push({ s: main.s, pal: main.pal, x: house + main.dx, y: g - main.s.length, smoke: main.smoke, chim: main.chim, house: true, w: main.s[0].length });
+      const hw = main ? main.s[0].length : 14;
+      if (st.level >= 6) for (let i = 0; i < 4; i++) { items.push({ s: FENCE, x: house + main.dx - 22 + i * 5, y: g - 4 }); items.push({ s: FENCE, x: house + main.dx + hw + 2 + i * 5, y: g - 4 }); }
+      if (st.level >= 3) items.push({ s: st.wilt >= 3 ? DEAD_TREE : TREE, x: Math.round(S.WW * 0.18), y: g - 12, wiltable: true });
+      if (st.level >= 5) items.push({ s: st.wilt >= 3 ? DEAD_TREE : TREE, x: Math.round(S.WW * (st.level >= 9 ? 0.93 : 0.86)), y: g - 12, wiltable: true });
+      if (st.level >= 7) {
+        items.push({ s: FOUNTAIN, pal: STONE, x: Math.round(S.WW * 0.3), y: g - 9, fountain: true });
+        [0.4, 0.53].forEach(f => items.push({ s: LAMP, x: Math.round(S.WW * f), y: g - 8, lamp: true }));
+      }
+      if (st.level >= 9) items.push({ s: PEDESTAL, pal: STONE, x: Math.round(S.WW * 0.8), y: g - 4, statue: true });
+      if (st.level >= 10) items.push({ bunting: true, x1: Math.round(S.WW * 0.18) + 5, x2: house + main.dx, y: g - 13 });
+      if (st.level === 2) items.push({ s: SAPLING, x: Math.round(S.WW * 0.2), y: g - 5, wiltable: true });
+      const flowers = st.level >= 2 ? 3 + st.lush * 3 : st.lush;
+      for (let i = 0; i < flowers; i++) items.push({ s: st.wilt >= 1 ? FLOWER_WILT : FLOWER, x: Math.round(r() * (S.WW - 6)), y: g - 4, f: FLOWER_COLORS[i % FLOWER_COLORS.length], wiltable: true });
+      const grass = st.level >= 1 ? 6 + st.level * 2 + st.lush * 2 : 3;
+      for (let i = 0; i < grass; i++) items.push({ s: GRASS, x: Math.round(r() * (S.WW - 4)), y: g - 2, wiltable: true });
+      S.items = items;
+    }
+
+    function setState(st) {
+      const grow = (st.level >= 7) !== (S.state.level >= 7);
+      S.state = st;
+      if (grow) resize(); else layout();
+    }
+
+    // ── 對話 ──
+    function say(text, sec) {
+      if (!opts.bubble) return;
+      if (!text) { opts.bubble.classList.remove('on'); S.talkUntil = 0; return; }
+      opts.bubble.textContent = text;
+      opts.bubble.classList.add('on');
+      S.talkUntil = S.t + 999;
+      S.talkEnd = performance.now() + (sec || 3.5) * 1000;
+    }
+    function placeBubble() {
+      const b = opts.bubble;
+      if (!b) return;
+      if (S.talkEnd && performance.now() > S.talkEnd) { b.classList.remove('on'); S.talkEnd = 0; }
+      const cw = canvas.getBoundingClientRect().width / S.W;
+      const sx = S.mon.wx - S.pan + nearShift();
+      const right = sx + 17 < S.W - 12;
+      b.classList.toggle('left', !right);
+      b.style.left = ((right ? sx + 17 : sx - 1) * cw) + 'px';
+      b.style.top = clamp((groundY() - 14 + S.mon.y + 4) * cw, 18, (S.H - 8) * cw) + 'px';
+      b.style.visibility = S.mon.out ? 'hidden' : 'visible';
+    }
+
+    const nearShift = () => Math.round(S.tilt * 4 + S.scroll * 0.6);
+    const midShift = () => Math.round(S.tilt * 2.5 + S.scroll * 0.35);
+    const farShift = () => Math.round(S.tilt * 1 + S.scroll * 0.15);
+
+    // ── 更新 ──
+    function update() {
+      S.tick++;
+      S.tilt += (S.tiltT - S.tilt) * 0.25;
+      S.clouds.forEach(c => { c.x += c.v * STEP * (S.state.weather === 'storm' ? 0.4 : 1); if (c.x > S.WW + 2) c.x = -c.w - 2; });
+      const m = S.mon, st = S.state;
+      if (S.scene) {
+        S.scene.step(S.t);
+        S.t += STEP;
+        if (S.t >= S.scene.dur) { const end = S.scene.end; S.scene = null; if (end) end(); }
+      } else {
+        S.t += STEP;
+        if (m.walkTo !== null) {
+          const d = m.walkTo - m.wx;
+          if (Math.abs(d) <= 1) { m.wx = m.walkTo; m.walkTo = null; m.walk = false; }
+          else { m.wx += Math.sign(d) * (st.body === 'flat' ? 0.6 : 1.2); m.flip = d < 0; m.walk = S.tick % 4 < 2; }
+          // 鏡頭跟著走
+          S.pan = clamp(S.pan + ((m.wx + 8 - S.W / 2) - S.pan) * 0.15, 0, S.WW - S.W);
+        }
+        const T = S.today;
+        let base = st.lonely ? 'sad' : st.body === 'flat' ? 'tired' : st.mood >= 70 ? 'happy' : st.mood <= 30 ? 'sad' : 'idle';
+        if (!st.lonely && T.dir) base = T.dir > 0 ? 'happy' : T.lv >= 2 ? 'worry' : 'sad';
+        // 跌到中跌以上：一直撐著傘，停下來就蹲坐
+        const rainy = T.dir < 0 && T.lv >= 1;
+        m.prop = rainy ? 'umbrella' : null;
+        m.sit = rainy && m.walkTo === null;
+        m.y = m.walk ? (S.tick % 4 < 2 ? -1 : 0) : T.dir > 0 && T.lv >= 2 ? hop((S.tick % 8) / 8, 3) : m.hopUntil > S.tick ? hop(1 - (m.hopUntil - S.tick) / 6, 5) : S.tick % 12 < 6 ? 0 : -1;
+        m.face = S.tick % 40 >= 38 && base !== 'happy' ? 'blink' : base;
+        ambient();
+        // 天氣帶來的常駐效果
+        if (st.weather === 'sunny' && S.tick % 30 === 0 && S.parts.filter(p => p.k === 'fly').length < 3) S.parts.push({ k: 'fly', x: S.pan + rnd(0, S.W), y: rnd(8, groundY() - 8), life: 8, ph: rnd(0, 6) });
+        if (st.lush >= 2 && st.wilt === 0 && S.tick % 50 === 0) S.parts.push({ k: 'petal', x: S.pan + rnd(0, S.W), y: -2, vy: 6, vx: 3, life: 6, c: pick(FLOWER_COLORS) });
+      }
+      const T = S.today;
+      const idleRain = S.scene ? 0 : T.dir < 0 ? (T.lv >= 2 ? 3 : T.lv === 1 && S.tick % 2 === 0 ? 1 : 0) : T.dir > 0 ? 0 :
+        (st.weather === 'storm' ? 2 : st.weather === 'rain' && S.tick % 2 === 0 ? 1 : 0);
+      const rain = S.rain || idleRain;
+      for (let i = 0; i < rain; i++) S.parts.push({ k: 'drop', x: S.darkCloud && S.scene ? rnd(S.darkCloud.x + 2, S.darkCloud.x + S.darkCloud.w - 2) : S.pan + rnd(-4, S.W + 4), y: S.darkCloud && S.scene ? S.darkCloud.y + 6 : -2, vy: rnd(40, 55), life: 1 });
+      // 房子冒煙、噴泉水花、城堡煙火
+      const house = S.items.find(it => it.smoke);
+      if (house && st.wilt < 2 && S.tick % 9 === 0) S.parts.push({ k: 'smoke', back: true, x: house.x + (house.chim || 15), y: house.y - 1, vx: rnd(1, 3), vy: -4, life: 2.2, mid: true });
+      const ft = S.items.find(it => it.fountain);
+      if (ft && st.wilt < 2 && S.tick % 2 === 0) S.parts.push({ k: 'px', back: true, mid: true, x: ft.x + 6 + rnd(-1, 1), y: ft.y, vx: rnd(-8, 8), vy: rnd(-14, -8), g: 40, c: pick(['#6FB7FF', '#FFFFFF']), life: 0.6 });
+      if (st.level >= 11 && !S.scene && (S.theme === 'dark' || st.weather === 'sunny') && S.tick % 40 === 0) burst(S.pan + rnd(10, S.W - 10), rnd(4, 12), 12, ['#FFC94A', '#FF8FA3', '#8BE9D4', '#FFFFFF']);
+      S.parts = S.parts.filter(p => {
+        p.age = (p.age || 0) + STEP;
+        if (p.vx) p.x += p.vx * STEP;
+        if (p.vy) p.y += p.vy * STEP;
+        if (p.g) p.vy += p.g * STEP;
+        if (p.upd) p.upd(p);
+        return p.age < p.life && p.y < S.H + 8;
+      });
+      if (S.flash > 0) S.flash--;
+      if (opts.page) opts.page.update();
+    }
+
+    /** 待機時依今天的漲跌持續產生天氣與小動作 */
+    function ambient() {
+      const T = S.today, m = S.mon, cx = m.wx + 8, top = groundY() - 14;
+      if (!(T.dir < 0 && T.lv >= 2) && S.darkCloud && S.darkCloud.ambient) S.darkCloud = null;
+      if (T.dir < 0) {
+        if (S.tick % (T.lv >= 1 ? 70 : 45) === 0) S.parts.push({ k: 'leaf', x: S.pan + rnd(0, S.W), y: -5, vy: rnd(7, 11), vx: rnd(2, 5), life: 6 });
+        if (T.lv >= 1 && S.tick % 180 === 60) S.parts.push({ k: 'tumble', back: true, x: S.pan - 12, y: groundY() - 11, vx: 22, life: 7, upd(p) { p.y = groundY() - 11 - Math.abs(Math.round(Math.sin(p.age * 5) * 3)); } });
+        if (T.lv >= 2) {
+          if (!S.darkCloud) S.darkCloud = { rows: cloudShape(26, 9), x: m.wx - 5, y: 1, w: 26, ambient: true };
+          S.darkCloud.x += Math.round((m.wx - 5 - S.darkCloud.x) * 0.2);
+          if (S.tick % 30 === 0) S.parts.push({ k: 'tear', x: m.wx + rnd(4, 12), y: groundY() - 7, vy: 18, life: 0.4 });
+          if (S.tick % 110 === 55) {
+            S.flash = 2;
+            let x = Math.round(m.wx + rnd(-10, 26)); const pts = [];
+            for (let y = 9; y < groundY(); y++) { pts.push([x, y]); if (y % 3 === 0) x += Math.random() < 0.5 ? -1 : 1; }
+            S.parts.push({ k: 'bolt', x: 0, y: 0, pts, life: 0.25 });
+          }
+        }
+      } else if (T.dir > 0) {
+        if (S.tick % (T.lv >= 1 ? 24 : 40) === 0) sparkles(cx, top - 2, T.lv >= 1 ? 3 : 2, 9);
+        if (T.lv >= 1 && S.tick % 30 === 0 && S.parts.filter(p => p.k === 'fly').length < 3) S.parts.push({ k: 'fly', x: S.pan + rnd(0, S.W), y: rnd(8, groundY() - 8), life: 8, ph: rnd(0, 6) });
+        if (T.lv >= 1 && S.tick % 60 === 20) S.parts.push({ k: 'coin', x: cx + rnd(-3, 3), y: -4, vy: 26, life: 2, upd(p) {
+          if (p.y >= groundY() - 14 + S.mon.y) { p.age = 99; sparkles(p.x, groundY() - 16, 2, 3); S.mon.hopUntil = S.tick + 6; }
+        } });
+        if (T.lv >= 2) {
+          if (S.tick % 30 === 0) burst(S.pan + rnd(10, S.W - 10), rnd(4, 12), 14, UPC());
+          if (S.tick % 2 === 0) S.parts.push({ k: 'px', x: S.pan + rnd(0, S.W), y: -2, vy: rnd(14, 22), vx: rnd(-4, 4), c: pick(UPC()), life: 3 });
+        }
+      }
+    }
+
+    // ── 畫面 ──
+    const THEME = {
+      light: { sky: ['#C4E8FA', '#D3EEFB', '#E0F3FC', '#ECF8FD'], gray: ['#C9CDD8', '#D2D5DF', '#DBDDE5', '#E4E6EC'], hill: '#A8D3EE', hill2: '#B9C6D6', ground: '#D7DBEA', top: '#B9BED6', cloud: '#FFFFFF', star: null },
+      dark: { sky: ['#151938', '#191E44', '#1E244F', '#242B5B'], gray: ['#17192A', '#1B1D30', '#202336', '#25283C'], hill: '#2A3266', hill2: '#272A40', ground: '#232950', top: '#323A6E', cloud: '#2E3566', star: '#FFF6C9' },
+    };
+    function draw() {
+      const th = THEME[S.theme], st = S.state, g = groundY();
+      const gloomy = S.today.dir < 0 || (S.today.dir === 0 && (st.weather === 'rain' || st.weather === 'storm')) || (S.scene && S.scene.gloomy);
+      const bands = gloomy ? th.gray : th.sky;
+      const bh = Math.ceil(g / bands.length);
+      bands.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(0, i * bh, S.W, bh); });
+      const fs = farShift();
+      if (th.star) S.stars.forEach(s => { if (Math.sin(S.tick / 4 + s.ph) > 0.2) dot(ctx, s.x - S.pan * 0.2 + fs, s.y, th.star); });
+      // 太陽／月亮
+      if (S.theme === 'dark') spr(ctx, MOON, S.W - 12 + fs, 4, { m: '#FFF1B8' });
+      else if (!gloomy && (S.today.dir > 0 || st.weather === 'sunny' || st.weather === 'clear')) { spr(ctx, SUN, S.W - 13 + fs, 3, { y: '#FFD84A' }); if ((st.weather === 'sunny' || (S.today.dir > 0 && S.today.lv >= 1)) && S.tick % 12 < 6) { dot(ctx, S.W - 11 + fs, 1, '#FFE68A'); dot(ctx, S.W - 6 + fs, 5, '#FFE68A'); } }
+      // 遠山
+      ctx.fillStyle = gloomy ? th.hill2 : th.hill;
+      const hp = Math.round(S.pan * 0.3) - fs;
+      for (let x = 0; x < S.W; x++) { const h = S.hills[x + hp] || 4; ctx.fillRect(x, g - h, 1, h); }
+      // 雲
+      S.clouds.forEach(c => {
+        const x = Math.round(c.x - S.pan * 0.5 + fs);
+        ctx.fillStyle = gloomy ? (S.theme === 'dark' ? '#2A2D44' : '#EEF0F4') : th.cloud;
+        ctx.fillRect(x + 1, Math.round(c.y), c.w - 2, 1); ctx.fillRect(x, Math.round(c.y) + 1, c.w, 2);
+      });
+      const ns = nearShift(), ms = midShift();
+      const nx = wx => wx - S.pan + ns, mx = wx => wx - S.pan * 0.92 + ms;
+      if (S.darkCloud) spr(ctx, S.darkCloud.rows, nx(S.darkCloud.x), S.darkCloud.y, { o: '#3B4060', g: '#6E7487', G: '#565C72' });
+      // 地面
+      ctx.fillStyle = th.top; ctx.fillRect(0, g, S.W, 1);
+      ctx.fillStyle = th.ground; ctx.fillRect(0, g + 1, S.W, S.H - g - 1);
+      for (let x = ((-Math.round(S.pan) % 6) + 6) % 6; x < S.W; x += 6) dot(ctx, x, g + 3, th.top, 2);
+      if (st.wilt >= 3) { ctx.fillStyle = '#8C7A5A'; for (let i = 0; i < S.WW; i += 13) { const x = nx(i); ctx.fillRect(x, g + 1, 1, 1); ctx.fillRect(x + 1, g + 2, 1, 1); ctx.fillRect(x + 1, g + 3, 2, 1); } }
+      // 家園（中景）
+      if (st.level >= 7) { ctx.fillStyle = S.theme === 'dark' ? '#3A4378' : '#E9ECF5'; for (let i = 0; i < S.WW; i += 5) ctx.fillRect(mx(i), g + 1, 3, 1); }
+      S.items.forEach(it => {
+        if (it.bunting) {
+          const cols = ['#E5484D', '#FFC94A', '#3CCBAA', '#8B7CF6', '#FF8FA3'];
+          for (let x = it.x1, i = 0; x < it.x2; x += 3, i++) {
+            const sag = Math.round(Math.sin(((x - it.x1) / (it.x2 - it.x1)) * Math.PI) * 3);
+            dot(ctx, mx(x), it.y + sag, '#4A4F6E'); dot(ctx, mx(x + 1), it.y + sag, '#4A4F6E');
+            if (i % 2 === 0) { dot(ctx, mx(x), it.y + sag + 1, cols[(i / 2) % 5], 2); dot(ctx, mx(x) + 0.5, it.y + sag + 3, cols[(i / 2) % 5]); }
+          }
+          return;
+        }
+        const pal = it.pal || (it.f ? Object.assign({}, st.wilt >= 1 ? WILT_PAL : HP, { f: st.wilt >= 1 ? '#A8845A' : it.f }) : it.wiltable && st.wilt >= 2 ? WILT_PAL : HP);
+        spr(ctx, it.s, mx(it.x), it.y, pal);
+        if (it.statue) { const gs = monSprite('happy', 'normal', false); spr(ctx, gs, mx(it.x) + 1, it.y - gs.length, GOLD); if (S.tick % 30 < 3) plus(ctx, mx(it.x) + 4 + (S.tick % 7), it.y - 10, '#FFFFFF'); }
+        if (it.lamp && (S.theme === 'dark' || gloomy)) { ctx.globalAlpha = S.tick % 24 < 20 ? 0.55 : 0.35; plus(ctx, mx(it.x) + 1, it.y, '#FFE68A', true); ctx.globalAlpha = 1; }
+      });
+      // 紀念旗區
+      S.flags.forEach((f, i) => {
+        const fx = 3 + i * 5, fy = g - 7;
+        spr(ctx, MINI_FLAG, mx(fx), fy, { o: '#6B4423', F: f.color });
+        if (f.fresh && S.tick % 12 < 6) plus(ctx, mx(fx) + 2, fy - 3, '#FFC94A');
+      });
+      if (S.flag) { const h = S.items.find(it => it.smoke) || { x: S.WW * 0.6, y: g - 12 }; spr(ctx, FLAG, mx(h.x - 6), g - 10, FLAG_PAL); }
+      S.parts.filter(p => p.back).forEach(p => drawPart(p, p.mid ? mx : nx));
+      // 小怪獸（近景）
+      const m = S.mon;
+      if (!m.out) {
+        const sp = monSprite(m.face, S.state.body, m.walk);
+        const my = g - sp.length + m.y + (m.sit ? 1 : 0);
+        const sx = nx(m.wx) - (sp[0].length - 16) / 2;
+        if (m.prop === 'flame') spr(ctx, FLAME[S.tick % 2], sx + 4, g + m.y, FLAME_PAL);
+        spr(ctx, sp, sx, my, PAL, m.flip);
+        if (S.leafOnHead) spr(ctx, LEAF[0], sx + 9, my + 1, LEAF_PAL);
+        if (m.prop === 'umbrella') spr(ctx, UMBRELLA, sx + 1, my - 9, UMB_PAL);
+        if (m.prop === 'flag') spr(ctx, FLAG, sx + 13, my - 4, FLAG_PAL);
+        if (S.state.lonely && !S.scene && S.tick % 24 < 16) { for (let i = 0; i < 3; i++) if (S.tick % 24 >= i * 4) dot(ctx, sx + 12 + i * 2, my - 3, S.theme === 'dark' ? '#B9BDD6' : '#4A4F6E'); }
+      }
+      S.parts.filter(p => !p.back).forEach(p => drawPart(p, nx));
+      if (S.flash > 0) { ctx.globalAlpha = 0.55; ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, S.W, S.H); ctx.globalAlpha = 1; }
+      placeBubble();
+      if (opts.page) opts.page.draw();
+    }
+    function drawPart(p, X) {
+      const x = X(p.x);
+      switch (p.k) {
+        case 'coin': spr(ctx, COIN[Math.floor(p.age * 10) % 4], x - 3, p.y - 3, COIN_PAL); break;
+        case 'spark': if (Math.floor(p.age * 12) % 2 === 0 || p.age < p.life * 0.5) plus(ctx, x, p.y, p.c, p.big); break;
+        case 'px': dot(ctx, x, p.y, p.c); break;
+        case 'heart': spr(ctx, HEART, x - 2, p.y, HEART_PAL); break;
+        case 'drop': ctx.fillStyle = '#7FA7D6'; ctx.fillRect(Math.round(x), Math.round(p.y), 1, 2); break;
+        case 'leaf': spr(ctx, LEAF[Math.floor(p.age * 3) % 2], x, p.y, LEAF_PAL); break;
+        case 'puff': dot(ctx, x, p.y, S.theme === 'dark' ? '#8C92B5' : '#A9AEC4', p.age < .5 ? 1 : 2); break;
+        case 'smoke': dot(ctx, x, p.y, S.theme === 'dark' ? '#5A608A' : '#E6E8EF', p.age < 1 ? 1 : 2); break;
+        case 'tumble': spr(ctx, TUMBLE[Math.floor(p.age * 8) % 4], x, p.y, { t: '#A88B5A' }); break;
+        case 'tear': dot(ctx, x, p.y, '#6FB7FF'); break;
+        case 'fly': spr(ctx, BUTTERFLY[S.tick % 4 < 2 ? 0 : 1], x + Math.sin(p.age * 2 + p.ph) * 6, p.y + Math.sin(p.age * 3 + p.ph) * 3, { y: '#FFC94A', o: '#1B1E3C' }); break;
+        case 'petal': dot(ctx, x + Math.sin(p.age * 2) * 3, p.y, p.c); break;
+        case 'bolt': ctx.fillStyle = '#FFE36E'; p.pts.forEach(([bx, by]) => ctx.fillRect(X(bx), by, 1, 1)); break;
+      }
+    }
+    function frame(now) {
+      S.acc += Math.min(0.25, (now - S.last) / 1000 || 0);
+      S.last = now;
+      let n = 0;
+      while (S.acc >= STEP && n < 4) { update(); S.acc -= STEP; n++; }
+      if (n) draw();
+      S.raf = requestAnimationFrame(frame);
+    }
+
+    // ── 舞台在頁面上的位置換算（給破框用） ──
+    function cw() { return canvas.getBoundingClientRect().width / S.W; }
+    function monPage() {
+      const r = canvas.getBoundingClientRect(), s = cw();
+      return { x: r.left / s + (S.mon.wx - S.pan + nearShift()), y: r.top / s + groundY() - 14 + S.mon.y, s };
+    }
+
+    // ═════════ 演出 ═════════
+    const UPC = () => [cssVar('--up', '#E5484D'), '#FFC94A', '#FF8FA3', '#8BE9D4', '#FFFFFF'];
+    function burst(x, y, n, cols) {
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2, sp = rnd(14, 26); S.parts.push({ k: 'px', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 18, c: pick(cols), life: rnd(0.7, 1.1) }); }
+    }
+    function sparkles(x, y, n, spread) {
+      for (let i = 0; i < n; i++) S.parts.push({ k: 'spark', x: x + rnd(-spread, spread), y: y + rnd(-spread / 2, spread / 3), c: pick(['#FFC94A', '#FFFFFF', '#FF8FA3']), life: rnd(0.5, 0.9), big: Math.random() < 0.3 });
+    }
+    function hearts(x, y, n) { for (let i = 0; i < n; i++) S.parts.push({ k: 'heart', x: x + rnd(-6, 6), y: y - rnd(0, 4), vy: rnd(-12, -7), vx: rnd(-3, 3), life: 1.2 }); }
+    const hop = (p, h) => -Math.round(h * Math.sin(Math.PI * clamp(p, 0, 1)));
+    const at = (t, x) => Math.abs(t - x) < STEP / 2;
+    const center = () => S.mon.wx + 8;
+
+    /** 跳出舞台到頁面上的某個點，做事，再跳回來 */
+    function excursion(t, t0, getTarget, during, label) {
+      const page = opts.page, m = S.mon;
+      if (!page) return false;
+      const k = t - t0;
+      if (k < 0) return false;
+      if (!S.ex) {
+        const from = monPage();
+        let to = getTarget();
+        if (!to) to = { x: from.x, y: from.y - 26 };
+        S.ex = { from, to };
+        m.out = true;
+        page.show(m.face, S.state.body);
+      }
+      const { from, to } = S.ex;
+      const back = monPage();
+      if (k < 0.6) { const p = k / 0.6; page.set(from.x + (to.x - from.x) * p, from.y + (to.y - from.y) * p - Math.sin(Math.PI * p) * 22, 'happy'); }
+      else if (k < 0.6 + during.dur) { during.step(k - 0.6, to); }
+      else if (k < 1.2 + during.dur) { const p = (k - 0.6 - during.dur) / 0.6; page.set(to.x + (back.x - to.x) * p, to.y + (back.y - to.y) * p - Math.sin(Math.PI * p) * 18, 'happy'); }
+      else { m.out = false; page.hide(); S.ex = null; return true; }
+      return false;
+    }
+    function heroTarget(dx) {
+      const el = opts.heroEl && opts.heroEl();
+      if (!el) return null;
+      const r = el.getBoundingClientRect(), s = cw();
+      if (r.bottom < 40 || r.top > innerHeight - 40) return null;
+      return { x: (r.left + r.width * (dx || 0.5)) / s - 8, y: r.top / s - 14, el };
+    }
+    function press(el) { if (!el) return; el.classList.add('gw-pressed'); setTimeout(() => el.classList.remove('gw-pressed'), 160); }
+
+    const SCENES = {
+      up1: () => ({ dur: 2.6, step(t) {
+        const m = S.mon; m.face = 'happy';
+        m.y = t < 0.5 ? hop(t / 0.5, 6) : t < 1.0 ? hop((t - 0.5) / 0.5, 4) : 0;
+        if (at(t, 0.25)) { say('耶！', 2); S.parts.push({ k: 'coin', x: center(), y: groundY() - 20, vy: -9, life: 1.6 }); sparkles(center(), groundY() - 20, 5, 7); }
+      } }),
+      up2: () => ({ dur: 4.4, step(t) {
+        const m = S.mon; m.face = 'happy';
+        if (at(t, 0)) say('金幣雨～', 3);
+        const beat = Math.floor(t / 0.35);
+        m.flip = beat % 2 === 1;
+        m.wx = home() + (beat % 4 < 2 ? -4 : 4);
+        m.y = hop((t % 0.35) / 0.35, 3);
+        if (t < 3.2 && S.tick % 2 === 0) S.parts.push({ k: 'coin', x: home() + 8 + rnd(-18, 18), y: -4, vy: rnd(20, 30), life: 3, upd(p) {
+          const top = groundY() - 14 + S.mon.y;
+          if (p.y >= top && Math.abs(p.x - center()) < 8) { p.age = 99; sparkles(p.x, top, 2, 3); }
+          else if (p.y >= groundY() - 3) p.age = 99;
+        } });
+      }, end() { S.mon.wx = home(); S.mon.flip = false; } }),
+      // 大漲：噴射衝出舞台，降落在總資產卡上，蹦跳放煙火，再跳回來
+      up3: () => ({ dur: 6, step(t) {
+        const m = S.mon; m.face = 'happy';
+        if (at(t, 0)) say('衝啊！', 1.2);
+        if (t < 0.5) { m.y = 1; m.wx = home() + (S.tick % 2 ? 1 : 0); return; }
+        if (t < 1.0) { m.prop = 'flame'; m.y = -Math.round(Math.pow((t - 0.5) / 0.5, 2) * 16); S.parts.push({ k: 'px', back: true, x: center() + rnd(-3, 3), y: groundY() - 1, vx: rnd(-10, 10), vy: rnd(-6, -2), c: pick(['#C9CEDF', '#FFFFFF']), life: 0.8 }); return; }
+        m.prop = null;
+        const done = excursion(t, 1.0, () => heroTarget(0.5), { dur: 2.6, step(k, to) {
+          const b = k < 0.9 ? hop((k % 0.45) / 0.45, 5) : 0;
+          if (k < STEP) press(to.el);
+          if (at(k, 0.45)) press(to.el);
+          opts.page.set(to.x, to.y + b, k > 1.0 ? 'happy' : 'happy');
+          if (at(k, 0.2)) { opts.page.confetti(); opts.page.say('破框啦！', 2); }
+          if (k > 0.3 && k < 2.2 && S.tick % 4 === 0) opts.page.firework(to.x + rnd(-40, 56), to.y - rnd(6, 26));
+        } });
+        if (done) { m.y = 0; }
+      }, end() { S.mon.prop = null; S.mon.y = 0; S.mon.out = false; S.ex = null; if (opts.page) opts.page.hide(); } }),
+      down1: () => ({ dur: 3.4, step(t) {
+        const m = S.mon; m.face = 'sad';
+        if (at(t, 0)) { say('唉…', 2.5); S.leafOnHead = false; }
+        if (t > 0.3 && t < 1.2 && S.tick % 3 === 0) S.parts.push({ k: 'puff', x: center() + 5, y: groundY() - 6, vx: rnd(4, 8), vy: rnd(-3, -1), life: 1.2 });
+        if (at(t, 0.5)) S.parts.push({ k: 'leaf', x: center(), y: -5, vy: 9, life: 2.6, upd(p) {
+          p.x = S.mon.wx + 9 + Math.round(Math.sin(p.age * 2.4) * 5);
+          if (p.y >= groundY() - 14 + S.mon.y + 1) { p.age = 99; S.leafOnHead = true; }
+        } });
+      } }),
+      down2: () => ({ dur: 5, gloomy: true, step(t) {
+        const m = S.mon; m.face = 'sad'; m.sit = true; m.prop = 'umbrella';
+        if (at(t, 0)) { say('下雨了…', 3); S.leafOnHead = false; }
+        S.rain = t < 4.3 ? 1 : 0;
+        if (at(t, 0.8)) S.parts.push({ k: 'tumble', back: true, x: S.pan - 12, y: groundY() - 11, vx: 24, life: 6, upd(p) { p.y = groundY() - 11 - Math.abs(Math.round(Math.sin(p.age * 5) * 3)); } });
+      }, end() { S.mon.prop = null; S.mon.sit = false; S.rain = 0; } }),
+      // 大跌：烏雲壓頂，雨從舞台漏到下面的卡片
+      down3: () => ({ dur: 6.4, gloomy: true, step(t) {
+        const m = S.mon; m.face = t < 2.5 ? 'worry' : 'sad'; m.prop = t > 2.4 ? 'umbrella' : null;
+        if (at(t, 0)) { S.leafOnHead = false; S.darkCloud = { rows: cloudShape(26, 9), x: S.pan - 26, y: 1, w: 26 }; }
+        if (S.darkCloud) S.darkCloud.x = Math.min(m.wx - 5, Math.round(S.pan - 26 + t * 40));
+        S.rain = t > 0.8 && t < 5.8 ? 3 : 0;
+        if (t > 1 && t < 2.4 && S.tick % 4 === 0) S.parts.push({ k: 'tear', x: m.wx + rnd(4, 12), y: groundY() - 7, vy: 18, life: 0.4 });
+        if (at(t, 1.6) || at(t, 3.4)) {
+          S.flash = 2;
+          let x = Math.round(m.wx + rnd(-6, 20)); const pts = [];
+          for (let y = 9; y < groundY(); y++) { pts.push([x, y]); if (y % 3 === 0) x += Math.random() < 0.5 ? -1 : 1; }
+          S.parts.push({ k: 'bolt', x: 0, y: 0, pts, life: 0.25 });
+        }
+        if (at(t, 2.4)) say('撐住！', 3.5);
+        if (opts.page && t > 1.4 && t < 5.4 && S.tick % 2 === 0) {
+          const r = canvas.getBoundingClientRect(), s = cw();
+          opts.page.drip((r.left + rnd(0.1, 0.9) * r.width) / s, r.bottom / s);
+        }
+        if (at(t, 2.2) && opts.leakEl && opts.page) opts.page.puddle(opts.leakEl());
+      }, end() { S.mon.prop = null; S.darkCloud = null; S.rain = 0; } }),
+      // 摸摸
+      pet: () => ({ dur: 1.6, step(t) {
+        const m = S.mon; m.face = 'happy';
+        m.y = hop(t / 0.5, 4);
+        if (at(t, 0)) { hearts(center(), groundY() - 16, 3); say(pick(petLines()), 2.5); }
+      } }),
+      // 寂寞後重逢
+      reunion: () => ({ dur: 2.6, step(t) {
+        const m = S.mon; m.face = 'happy';
+        m.y = t < 1.5 ? hop((t % 0.5) / 0.5, 6) : 0;
+        if (at(t, 0)) { say('你終於來了！', 3); hearts(center(), groundY() - 16, 5); }
+      } }),
+      // 記帳餵食
+      eat: () => ({ dur: 3, step(t) {
+        const m = S.mon;
+        if (at(t, 0)) S.parts.push({ k: 'coin', x: center(), y: -6, vy: 30, life: 1.2, upd(p) { if (p.y >= groundY() - 7) p.age = 99; } });
+        m.face = t > 0.9 && t < 2.0 ? (S.tick % 3 === 0 ? 'happy' : 'eat') : 'happy';
+        if (at(t, 1.0)) { say('好吃！記帳辛苦了', 2.5); hearts(center(), groundY() - 16, 2); }
+        m.y = t > 2 ? hop((t - 2) / 0.4, 3) : 0;
+      } }),
+      // 創新高：扛旗跳上主卡插旗
+      flag: () => ({ dur: 4.2, step(t) {
+        const m = S.mon; m.face = 'happy';
+        if (at(t, 0)) { say('創新高！', 1.4); m.prop = 'flag'; }
+        if (t < 0.5) return;
+        m.prop = null;
+        const done = excursion(t, 0.5, () => heroTarget(0.86), { dur: 1.6, step(k, to) {
+          opts.page.set(to.x, to.y + (k < 0.4 ? hop(k / 0.4, 4) : 0), 'happy', k < 0.5 ? 'flag' : null);
+          if (at(k, 0.5)) { S.flagOnHero = true; opts.page.plantFlag(to.el); press(to.el); opts.page.say('插旗！', 2); }
+        } });
+        if (done) m.y = 0;
+      }, end() { S.mon.prop = null; S.mon.out = false; S.ex = null; if (opts.page) opts.page.hide(); } }),
+    };
+    function petLines() {
+      const st = S.state;
+      const l = ['嘿嘿', '再摸一下', '今天也要記得喝水'];
+      if (st.streak >= 3) l.push(st.streak + ' 連漲！我好圓', '最近好開心～');
+      if (st.streak <= -2) l.push('肚子有點餓…', '會漲回來的吧？');
+      if (st.level >= 5) l.push('我們的房子很溫暖');
+      return l;
+    }
+
+    const reduce = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function play(name) {
+      if (!SCENES[name]) return;
+      if (S.mon.out && opts.page) opts.page.hide();
+      S.parts = S.parts.filter(p => p.k === 'fly'); S.rain = 0; S.darkCloud = null; S.ex = null;
+      Object.assign(S.mon, { prop: null, y: 0, flip: false, out: false, sit: false, walkTo: null, walk: false, wx: home() });
+      S.pan = clamp(S.mon.wx + 8 - S.W / 2, 0, S.WW - S.W);
+      if (reduce()) { const s = SCENES[name](); s.step(0); S.scene = null; return; }
+      S.scene = SCENES[name]();
+      S.t = 0;
+    }
+
+    // ── 互動：點、長按、拖曳、傾斜 ──
+    let down = null, lp = 0, tiltAsked = false;
+    function hitFlag(ev) {
+      const r = canvas.getBoundingClientRect(), s = r.width / S.W;
+      const x = (ev.clientX - r.left) / s, y = (ev.clientY - r.top) / s;
+      const shift = S.pan * 0.92 - midShift();
+      return S.flags.findIndex((f, i) => { const fx = 3 + i * 5 - shift; return x >= fx - 1 && x <= fx + 4 && y >= groundY() - 9 && y <= groundY(); });
+    }
+    function hitMon(ev) {
+      const r = canvas.getBoundingClientRect(), s = r.width / S.W;
+      const x = (ev.clientX - r.left) / s, y = (ev.clientY - r.top) / s;
+      const sx = S.mon.wx - S.pan + nearShift(), sy = groundY() - 14 + S.mon.y;
+      return { hit: x >= sx - 2 && x <= sx + 18 && y >= sy - 3 && y <= sy + 15, wx: x + S.pan - nearShift() };
+    }
+    canvas.addEventListener('pointerdown', ev => {
+      down = { x: ev.clientX, y: ev.clientY, pan: S.pan, drag: false, long: false };
+      clearTimeout(lp);
+      lp = setTimeout(() => { if (down && !down.drag && hitMon(ev).hit) { down.long = true; if (opts.onLongPress) opts.onLongPress(); } }, 550);
+      askTilt();
+    });
+    canvas.addEventListener('pointermove', ev => {
+      if (!down) return;
+      const dx = ev.clientX - down.x;
+      if (Math.abs(dx) > 6) { down.drag = true; clearTimeout(lp); }
+      if (down.drag) S.pan = clamp(down.pan - dx / cw(), 0, S.WW - S.W);
+    });
+    const endPtr = ev => {
+      clearTimeout(lp);
+      if (!down) return;
+      const d = down; down = null;
+      if (d.drag || d.long || S.scene) return;
+      const fi = hitFlag(ev);
+      if (fi >= 0) { const f = S.flags[fi]; say(f.label + (f.date ? '（' + f.date.replace(/-/g, '/') + '）' : ''), 4); S.mon.walkTo = clamp(3 + fi * 5 + 6, 2, S.WW - 18); return; }
+      const h = hitMon(ev);
+      if (h.hit) { if (S.state.lonely) { play('reunion'); S.state.lonely = false; } else play('pet'); if (opts.onTap) opts.onTap(); }
+      else { S.mon.walkTo = clamp(Math.round(h.wx - 8), 2, S.WW - 18); }
+    };
+    canvas.addEventListener('pointerup', endPtr);
+    canvas.addEventListener('pointercancel', () => { clearTimeout(lp); down = null; });
+    canvas.style.touchAction = 'pan-y';
+
+    function onTilt(e) { if (e.gamma != null) S.tiltT = clamp(e.gamma / 25, -1, 1); }
+    function askTilt() {
+      if (tiltAsked) return;
+      tiltAsked = true;
+      const D = window.DeviceOrientationEvent;
+      if (!D) return;
+      if (typeof D.requestPermission === 'function') D.requestPermission().then(r => { if (r === 'granted') addEventListener('deviceorientation', onTilt); }).catch(() => {});
+      else addEventListener('deviceorientation', onTilt);
+    }
+    addEventListener('scroll', () => { const r = canvas.getBoundingClientRect(); S.scroll = clamp((r.top - innerHeight / 3) / 60, -3, 3); }, { passive: true });
+
+    function start() { resize(); cancelAnimationFrame(S.raf); S.last = performance.now(); S.raf = requestAnimationFrame(frame); }
+    function stop() { cancelAnimationFrame(S.raf); S.raf = 0; }
+    function seek(name, t) { resize(); if (name) play(name); for (let i = 0, n = Math.round(t / STEP); i < n; i++) update(); draw(); }
+    return { start, stop, play, seek, resize, say, setState, setTheme(t) { S.theme = t; }, setFlag(v) { S.flag = v; }, setFlags(list) { S.flags = list || []; }, redraw: () => draw(), state: S,
+      /** 今天的漲跌（小數，例如 -0.0145）；盤中更新時重設 */
+      setToday(p) { const a = Math.abs(p || 0); S.today = a < 0.0005 ? { dir: 0, lv: 0 } : { dir: p > 0 ? 1 : -1, lv: a < 0.005 ? 0 : a < 0.015 ? 1 : 2 }; } };
+  }
+
+  // ═════════ 頁面層：小怪獸跳出舞台、彩帶、漏雨、插旗 ═════════
+  function PageLayer() {
+    let cv, ctx, W, H, s = 4, parts = [], mon = null, bubble, bubbleEnd = 0, flagEl = null, tick = 0;
+    function setup(scale) {
+      s = scale || s;
+      if (!cv) {
+        cv = document.createElement('canvas'); cv.className = 'gw-page'; cv.setAttribute('aria-hidden', 'true'); document.body.appendChild(cv);
+        ctx = cv.getContext('2d');
+        bubble = document.createElement('div'); bubble.className = 'gw-bubble gw-page-bubble'; document.body.appendChild(bubble);
+      }
+      W = Math.ceil(innerWidth / s); H = Math.ceil(innerHeight / s);
+      if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    }
+    function update() {
+      tick++;
+      parts = parts.filter(p => {
+        p.age = (p.age || 0) + STEP;
+        if (p.age < 0) return true;
+        p.x += (p.vx || 0) * STEP; p.y += (p.vy || 0) * STEP;
+        if (p.g) p.vy += p.g * STEP;
+        if (p.sway) p.x += Math.sin(p.age * p.sway + p.ph) * 0.6;
+        return p.age < p.life && p.y < H + 6;
+      });
+    }
+    function draw() {
+      if (!cv) return;
+      setup();
+      ctx.clearRect(0, 0, W, H);
+      parts.forEach(p => {
+        if (p.age < 0) return;
+        if (p.k === 'leaf') spr(ctx, LEAF[Math.floor(p.age * 3) % 2], p.x, p.y, LEAF_PAL);
+        else if (p.k === 'drop') { ctx.fillStyle = '#7FA7D6'; ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 2); }
+        else dot(ctx, p.x, p.y, p.c, p.s);
+      });
+      if (flagEl) {
+        const r = flagEl.getBoundingClientRect();
+        if (r.bottom > 0 && r.top < innerHeight) spr(ctx, FLAG, (r.left + r.width * 0.86) / s + 2, r.top / s - 10, FLAG_PAL);
+      }
+      if (mon) {
+        const sp = monSprite(mon.face, mon.body, false);
+        spr(ctx, sp, mon.x, mon.y, PAL);
+        if (mon.prop === 'flag') spr(ctx, FLAG, mon.x + 13, mon.y - 4, FLAG_PAL);
+        bubble.style.left = ((mon.x + 17) * s) + 'px';
+        bubble.style.top = ((mon.y + 4) * s) + 'px';
+      }
+      if (bubbleEnd && performance.now() > bubbleEnd) { bubble.classList.remove('on'); bubbleEnd = 0; }
+    }
+    return {
+      update, draw,
+      show(face, body) { mon = { x: 0, y: 0, face, body }; },
+      set(x, y, face, prop) { if (mon) Object.assign(mon, { x, y, face: face || mon.face, prop }); },
+      hide() { mon = null; bubble && bubble.classList.remove('on'); },
+      attach(scale) { setup(scale); },
+      say(text, sec) { bubble.textContent = text; bubble.classList.add('on'); bubbleEnd = performance.now() + (sec || 2) * 1000; },
+      confetti() {
+        const cols = [cssVar('--up', '#E5484D'), '#FFC94A', '#FF8FA3', '#3CCBAA', '#8B7CF6'];
+        for (let i = 0; i < 150; i++) parts.push({ x: rnd(0, W), y: rnd(-H * 0.6, -2), vy: rnd(14, 26), c: pick(cols), s: Math.random() < 0.3 ? 2 : 1, sway: rnd(2, 4), ph: rnd(0, 6), life: 5.5 });
+      },
+      firework(x, y) {
+        const c = pick([cssVar('--up', '#E5484D'), '#FFC94A', '#FF8FA3', '#3CCBAA', '#8B7CF6']);
+        for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; parts.push({ x, y, vx: Math.cos(a) * 20, vy: Math.sin(a) * 20, g: 16, c, life: 1 }); }
+      },
+      leaves() { for (let i = 0; i < 18; i++) parts.push({ k: 'leaf', x: rnd(-10, W), y: rnd(-H * 0.5, -6), vx: rnd(4, 9), vy: rnd(8, 14), sway: rnd(1.5, 3), ph: rnd(0, 6), life: 7 }); },
+      drip(x, y) { parts.push({ k: 'drop', x, y, vy: rnd(30, 45), life: rnd(0.6, 1.1) }); },
+      puddle(el) {
+        if (!el) return;
+        const p = document.createElement('i');
+        p.className = 'gw-puddle';
+        p.style.left = rnd(8, 70) + '%';
+        p.style.top = rnd(10, 60) + '%';
+        el.appendChild(p);
+        setTimeout(() => p.remove(), 25000);
+      },
+      plantFlag(el) { flagEl = el; },
+      clearFlag() { flagEl = null; },
+      /** 離開總覽時清掉畫面上殘留的東西 */
+      clear() { mon = null; parts = []; flagEl = null; if (bubble) bubble.classList.remove('on'); if (ctx) ctx.clearRect(0, 0, W, H); },
+    };
+  }
+
+  /** 把舞台和頁面層接起來（頁面層整個 App 共用一個） */
+  let sharedPage = null;
+  function mount(canvas, opts) {
+    const page = sharedPage || (sharedPage = PageLayer());
+    const stage = Stage(canvas, Object.assign({}, opts, { page }));
+    const attach = () => page.attach(canvas.getBoundingClientRect().width / stage.state.W);
+    const origStart = stage.start, origSeek = stage.seek;
+    stage.start = () => { origStart(); attach(); };
+    stage.seek = (n, t) => { stage.resize(); attach(); origSeek(n, t); };
+    const onResize = () => { stage.resize(); attach(); };
+    addEventListener('resize', onResize);
+    const origStop = stage.stop;
+    stage.stop = () => { origStop(); removeEventListener('resize', onResize); };
+    stage.page = page;
+    return stage;
+  }
+
+  // ═════════ 各頁用的小股娃娃（靜態圖） ═════════
+  const ACC = {
+    hat: { rows: ['...y...', '..yry..', '..ryr..', '.yryry.', 'ryryryr'], pal: { y: '#FFC94A', r: '#FF5C7A' }, x: 8, y: 5 },
+    glasses: { rows: ['oooo..oooo', 'o..oooo..o', 'oooo..oooo'], pal: { o: '#1B1E3C' }, x: 6, y: 12 },
+    wrench: { rows: ['.ss.', '.s.s', '.ss.', 's...', 's...'], pal: { s: '#8A8FA8' }, x: 18, y: 13 },
+    question: { rows: ['.oo.', 'o..o', '...o', '..o.', '....', '..o.'], pal: { o: '#1B1E3C' }, x: 18, y: 2 },
+    coin: { rows: COIN[0], pal: COIN_PAL, x: 16, y: 13 },
+    sweat: { rows: ['.t', 'tt', 'tt'], pal: { t: '#6FB7FF' }, x: 17, y: 9 },
+    news: { rows: ['oooooo', 'owwwwo', 'okkkko', 'owwwwo', 'okkwko', 'oooooo'], pal: { o: '#1B1E3C', w: '#FFFFFF', k: '#8A8FA8' }, x: 16, y: 13 },
+  };
+  const miniCache = {};
+  /** opts: { face, body, acc, walk } → 圖片網址（22×21 像素，畫面上用 CSS 放大） */
+  function miniURL(o) {
+    o = o || {};
+    const key = [o.face, o.body, o.acc, o.walk].join('|');
+    if (miniCache[key]) return miniCache[key];
+    const c = document.createElement('canvas');
+    c.width = 22; c.height = 21;
+    const x = c.getContext('2d');
+    const sp = monSprite(o.face || 'idle', o.body || 'normal', !!o.walk);
+    spr(x, sp, 3 + Math.round((16 - sp[0].length) / 2), 21 - sp.length, PAL);
+    const a = ACC[o.acc];
+    if (a) spr(x, a.rows, a.x, a.y, a.pal);
+    return (miniCache[key] = c.toDataURL());
+  }
+
+  return { NAME, mount, computeState, achievements, miniURL, LEVELS, FLAG_COLORS, monSprite, spr, PAL };
+})();
+</script>
+<script>
+// ═════════ 基本工具 ═════════
+const ICONS = {
+  home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/>',
+  chart: '<path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-6"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  eyeoff: '<path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c6.5 0 10 8 10 8a17.6 17.6 0 0 1-2.2 3.2M6.6 6.6A17.4 17.4 0 0 0 2 12s3.5 8 10 8a9.7 9.7 0 0 0 5.4-1.6"/><path d="m2 2 20 20"/><path d="M14.1 14.1a3 3 0 0 1-4.2-4.2"/>',
+  refresh: '<path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/>',
+  edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  trash: '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>',
+  x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  chevron: '<path d="m9 18 6-6-6-6"/>',
+  upArrow: '<path d="m18 15-6-6-6 6"/>',
+  downArrow: '<path d="m6 9 6 6 6-6"/>',
+  wallet: '<path d="M20 7V5a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2"/><path d="M3 6v13a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-3"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+};
+const icon = (n, color, accent) => '<img class="pi" alt="" src="' + pxIcon(n, color, accent) + '">';
+/** 會重複呼叫（換主題時重畫顏色），所以保留 data-icon */
+function paintIcons(root) { root.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon, el.dataset.iconColor); }); }
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('zcb.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('zcb.' + k, JSON.stringify(v)); } catch (e) {} },
+};
+
+const S = {
+  data: null, D: null, view: 'home',
+  hidden: store.get('hidden', false),
+  updown: store.get('updown', 'red'),
+  theme: store.get('theme', 'auto'),
+  range: store.get('range', 'all'),
+  quiet: store.get('quiet', false),
+  edit: null, showClosed: false, charts: [], loadedAt: 0,
+};
+
+const nf = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 });
+const MASK = '••••••';
+function money(n) { if (S.hidden) return MASK; return n == null || isNaN(n) ? '—' : nf.format(Math.round(n)); }
+function signed(n) { if (n == null) return '—'; if (S.hidden) return (n >= 0 ? '+' : '−') + '••••'; return (n > 0 ? '+' : n < 0 ? '−' : '±') + nf.format(Math.abs(Math.round(n))); }
+function wan(n) {
+  if (S.hidden) return '••';
+  const a = Math.abs(n);
+  if (a >= 1e8) return +(n / 1e8).toFixed(2) + '億';
+  if (a >= 1e4) return +(n / 1e4).toFixed(a >= 1e6 ? 0 : 1) + '萬';
+  return nf.format(n);
+}
+function pct(x, d = 1) { return x == null || !isFinite(x) ? '—' : (x * 100).toFixed(d) + '%'; }
+function dir(n) { return n > 0 ? 'up' : n < 0 ? 'down' : 'flat'; }
+function arrow(n) { return n > 0 ? '▲' : n < 0 ? '▼' : '–'; }
+function deltaPill(n, base, extra) {
+  if (n == null) return '<span class="pill flat">第一筆紀錄</span>';
+  const p = base ? ' <span class="sep">·</span> ' + pct(n / base) : '';
+  return '<span class="pill ' + dir(n) + '"><span class="arrow">' + arrow(n) + '</span>' + signed(n) + p + (extra ? ' <span class="sep">' + extra + '</span>' : '') + '</span>';
+}
+const fmtD = s => s.replace(/-/g, '/');
+const shortD = s => +s.slice(5, 7) + '/' + +s.slice(8, 10);
+const ts = s => Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10));
+const tsLabel = t => { const d = new Date(t); return d.getUTCFullYear() + '/' + (d.getUTCMonth() + 1) + '/' + d.getUTCDate(); };
+const days = (a, b) => (ts(b) - ts(a)) / 864e5;
+const WEEK = '日一二三四五六';
+
+/** 算式輸入：支援 2782+1500、1,234×2 這類寫法 */
+function evalExpr(raw) {
+  const s = String(raw).replace(/[,，\s]/g, '').replace(/[＋]/g, '+').replace(/[－−]/g, '-').replace(/[×xX＊]/g, '*').replace(/[÷／]/g, '/').replace(/[（]/g, '(').replace(/[）]/g, ')');
+  if (s === '') return null;
+  let i = 0;
+  const peek = () => s[i];
+  function num() {
+    if (peek() === '(') { i++; const v = add(); if (s[i++] !== ')') throw 0; return v; }
+    if (peek() === '-') { i++; return -num(); }
+    const m = s.slice(i).match(/^\d+(\.\d+)?/);
+    if (!m) throw 0;
+    i += m[0].length;
+    return parseFloat(m[0]);
+  }
+  function mul() { let v = num(); while (peek() === '*' || peek() === '/') { const o = s[i++]; const r = num(); v = o === '*' ? v * r : v / r; } return v; }
+  function add() { let v = mul(); while (peek() === '+' || peek() === '-') { const o = s[i++]; const r = mul(); v = o === '+' ? v + r : v - r; } return v; }
+  try { const v = add(); if (i !== s.length || !isFinite(v)) return NaN; return Math.round(v * 100) / 100; } catch (e) { return NaN; }
+}
+
+// ═════════ 像素圖示（12×12，x＝主色、a＝點綴色） ═════════
+const PX_ICONS = {
+  home: ['.....xx.....', '....xxxx....', '...xx..xx...', '..xx....xx..', '.xx......xx.', 'xxxxxxxxxxxx', '.x........x.', '.x.aa.....x.', '.x.aa..xx.x.', '.x.....xx.x.', '.x.....xx.x.', '.xxxxxxxxxx.'],
+  list: ['............', 'aa.xxxxxxxxx', 'aa.xxxxxxxxx', '............', '............', 'aa.xxxxxxxxx', 'aa.xxxxxxxxx', '............', '............', 'aa.xxxxxx...', 'aa.xxxxxx...', '............'],
+  chart: ['............', '.........aa.', '.........aa.', '......xx.aa.', '......xx.aa.', '...xx.xx.aa.', '...xx.xx.aa.', '...xx.xx.aa.', '...xx.xx.aa.', '...xx.xx.aa.', 'xxxxxxxxxxxx', '............'],
+  gear: ['....xxxx....', '.x..x..x..x.', '.xxxx..xxxx.', '..xx....xx..', 'xxx..xx..xxx', 'x...x..x...x', 'x...x..x...x', 'xxx..xx..xxx', '..xx....xx..', '.xxxx..xxxx.', '.x..x..x..x.', '....xxxx....'],
+  plus: ['............', '.....xx.....', '.....xx.....', '.....xx.....', '.....xx.....', '.xxxxxxxxxx.', '.xxxxxxxxxx.', '.....xx.....', '.....xx.....', '.....xx.....', '.....xx.....', '............'],
+  eye: ['............', '............', '....xxxx....', '..xx....xx..', '.x...xx...x.', 'x...xaax...x', 'x...xaax...x', '.x...xx...x.', '..xx....xx..', '....xxxx....', '............', '............'],
+  eyeoff: ['x...........', '.x..........', '..x.xxxx....', '..xx....xx..', '.x..xxx...x.', 'x...xxax...x', 'x...xaxx...x', '.x...xxx..x.', '..xx....xx..', '....xxxx.x..', '..........x.', '...........x'],
+  refresh: ['....xxxx....', '..xx....xx.x', '.x.......xxx', '.x......xxxx', 'x...........', 'x...........', '...........x', '...........x', 'xxxx......x.', 'xxx.......x.', 'x.xx....xx..', '....xxxx....'],
+  edit: ['.........aa.', '........aaaa', '.......x.aa.', '......x..x..', '.....x..x...', '....x..x....', '...x..x.....', '..x..x......', '.x..x.......', '.xxx........', 'xx..........', '............'],
+  trash: ['....xxxx....', 'xxxxxxxxxxxx', '............', '.xxxxxxxxxx.', '.x..x..x..x.', '.x..x..x..x.', '.x..x..x..x.', '.x..x..x..x.', '.x..x..x..x.', '.x..x..x..x.', '.xxxxxxxxxx.', '............'],
+  x: ['............', '.xx......xx.', '..xx....xx..', '...xx..xx...', '....xxxx....', '.....xx.....', '....xxxx....', '...xx..xx...', '..xx....xx..', '.xx......xx.', '............', '............'],
+  chevron: ['............', '...xx.......', '....xx......', '.....xx.....', '......xx....', '.......xx...', '......xx....', '.....xx.....', '....xx......', '...xx.......', '............', '............'],
+  upArrow: ['............', '............', '.....xx.....', '....xxxx....', '...xxxxxx...', '..xxxxxxxx..', '.....xx.....', '.....xx.....', '.....xx.....', '.....xx.....', '............', '............'],
+  downArrow: ['............', '............', '.....xx.....', '.....xx.....', '.....xx.....', '.....xx.....', '..xxxxxxxx..', '...xxxxxx...', '....xxxx....', '.....xx.....', '............', '............'],
+  // 帳戶類型
+  bank: ['.....xx.....', '...xxxxxx...', '.xxxxxxxxxx.', '............', '.x..x..x..x.', '.x..x..x..x.', '.x..x..x..x.', '.x..x..x..x.', '............', 'xxxxxxxxxxxx', 'xxxxxxxxxxxx', '............'],
+  stock: ['............', '........xxxx', '..........xx', '.........x.x', '........x...', '...x...x....', '..x.x.x.....', '.x...x......', 'x...........', '............', 'xxxxxxxxxxxx', '............'],
+  fund: ['....x..x....', '.....xx.....', '....xxxx....', '...x....x...', '..x......x..', '.x...xx...x.', 'x...x.....x.', 'x....xx...x.', 'x......x..x.', 'x...xx....x.', '.x........x.', '..xxxxxxxx..'],
+  cash: ['............', '............', 'xxxxxxxxxxxx', 'x..........x', 'x.xx....xx.x', 'x....xx....x', 'x...x..x...x', 'x....xx....x', 'x.xx....xx.x', 'x..........x', 'xxxxxxxxxxxx', '............'],
+  globe: ['....xxxx....', '..xx.x..xx..', '.x...x....x.', '.x..xxxx..x.', 'x..x.x..x..x', 'xxxxxxxxxxxx', 'x..x.x..x..x', '.x..xxxx..x.', '.x...x....x.', '..xx.x..xx..', '....xxxx....', '............'],
+  // 卡片標題
+  target: ['....xxxx....', '..xx....xx..', '.x..xxxx..x.', '.x.x....x.x.', 'x.x..aa..x.x', 'x.x.aaaa.x.x', 'x.x.aaaa.x.x', 'x.x..aa..x.x', '.x.x....x.x.', '.x..xxxx..x.', '..xx....xx..', '....xxxx....'],
+  calendar: ['..x.....x...', 'xxxxxxxxxxxx', 'xaaaaaaaaaax', 'xxxxxxxxxxxx', 'x..........x', 'x.xx.xx.xx.x', 'x..........x', 'x.xx.xx.xx.x', 'x..........x', 'x.xx.xx....x', 'x..........x', 'xxxxxxxxxxxx'],
+  coin: ['...xxxxxx...', '..xaaaaaax..', '.xaaxxxxaax.', 'xaaaxaaaaaax', 'xaaaaxxaaaax', 'xaaaaaaxaaax', 'xaaaaaaxaaax', 'xaaaxxxaaaax', '.xaaaxaaaax.', '..xaaaaaax..', '...xxxxxx...', '............'],
+  flag: ['.x..........', '.xaaaaaa....', '.xaaaaaaa...', '.xaaaaaa....', '.xaaaaa.....', '.x..........', '.x..........', '.x..........', '.x..........', '.x..........', 'xxx.........', '............'],
+  news: ['xxxxxxxxxx..', 'x........xx.', 'x.aaaa...x.x', 'x.aaaa.x.x.x', 'x.aaaa...x.x', 'x........x.x', 'x.xxxxxx.x.x', 'x........x.x', 'x.xxxxxx.x.x', 'x........x.x', '.xxxxxxxxxxx', '............'],
+  pie: ['....xxxx....', '..xxaaaaxx..', '.xaaaaaaaax.', '.xaaaaaaaax.', 'xaaaaaa....x', 'xaaaaa.....x', 'xaaaaa.....x', 'xaaaaaa....x', '.xaaaaa...x.', '.x.........x', '..xx....xx..', '....xxxx....'],
+};
+const TYPE_ICON = { 銀行存款: 'bank', 股票ETF: 'stock', 基金: 'fund', 現金: 'cash', 外幣: 'globe' };
+const pxCache = {};
+/** color：'inv' 表示反白（深底按鈕用），其他字串就是色碼；預設用目前主題的文字色 */
+function pxIcon(name, color, accent) {
+  const c = color === 'inv' ? css('--page') : color || css('--text');
+  const a = accent || '#3CCBAA';
+  const key = name + c + a;
+  if (pxCache[key]) return pxCache[key];
+  const rows = PX_ICONS[name] || PX_ICONS.x;
+  const cv = document.createElement('canvas');
+  cv.width = 12; cv.height = 12;
+  GUGU.spr(cv.getContext('2d'), rows, 0, 0, { x: c, a: a });
+  return (pxCache[key] = cv.toDataURL());
+}
+function typeIcon(t) {
+  const col = css('--t' + (S.data.types.indexOf(t) + 1));
+  return '<img class="pi" alt="" src="' + pxIcon(TYPE_ICON[t] || 'bank', col, col) + '">';
+}
+
+// ═════════ 後端呼叫 ═════════
+// 畫面在 GitHub Pages，資料向 Apps Script API 要；密碼來自設定連結 #k=…，存在這台手機
+const API_URL = 'https://script.google.com/macros/s/AKfycbyc4vCX_ToYQpn6zKbyy35DZ160Ew-KGIZ3YDoRfZ2fDMOcmwI1oWEFG3gLob55x6s1Iw/exec';
+function apiKey() {
+  const m = location.hash.match(/k=([\w-]+)/);
+  if (m) store.set('key', m[1]);
+  return m ? m[1] : store.get('key', '');
+}
+async function api(fn, ...args) {
+  if (window.__MOCK__) return window.__MOCK__[fn](...args);
+  const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ k: apiKey(), fn, args }) });
+  const out = await res.json();
+  if (!out.ok) throw new Error(out.error);
+  return out.data;
+}
+async function call(fn, args, okMsg) {
+  busy(true);
+  try {
+    const data = await api(fn, ...args);
+    setData(data);
+    if (okMsg) toast(okMsg);
+    return true;
+  } catch (e) {
+    toast('出錯了：' + (e && e.message ? e.message : e));
+    return false;
+  } finally { busy(false); }
+}
+function busy(on) { $('#busy').classList.toggle('on', on); }
+let toastT;
+function toast(msg) {
+  const t = $('#toast'), bad = /^(出錯|讀取失敗|有欄位|至少|請)/.test(msg);
+  t.innerHTML = '<img alt="" src="' + GUGU.miniURL({ face: bad ? 'worry' : 'happy', acc: bad ? 'question' : null, body: S.pet ? S.pet.body : 'normal' }) + '">' + esc(msg);
+  t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2600);
+}
+
+// ═════════ 資料整理 ═════════
+function setData(data, background) {
+  const same = S.data && JSON.stringify(S.data) === JSON.stringify(data);
+  S.data = data;
+  if (!data.needsSetup) store.set('cache', data);
+  S.D = data.needsSetup ? null : derive(data);
+  // 背景更新時不要重畫正在填的表單
+  if (background && S.view === 'entry' && $('.frow')) return;
+  // 資料沒變就不重畫（不然股娃娃的演出會被打斷），只補上今天的演出
+  if (background && same && S.view === 'home' && GW.stage) { if (S.liveTried) autoplay(GW.stage); return; }
+  render();
+}
+
+function derive(d) {
+  const acc = {};
+  d.accounts.forEach(a => { acc[a.id] = a; });
+  const isInv = id => acc[id] && d.investTypes.indexOf(acc[id].type) >= 0;
+  const recs = d.records.map(r => {
+    let total = 0, inv = 0, cost = 0, covered = 0, hasCost = false;
+    const byType = {};
+    Object.keys(r.entries).forEach(id => {
+      const e = r.entries[id];
+      const t = acc[id] ? acc[id].type : '銀行存款';
+      total += e.a;
+      byType[t] = (byType[t] || 0) + e.a;
+      if (isInv(id)) {
+        inv += e.a;
+        if (e.c != null) { cost += e.c; covered += e.a; hasCost = true; }
+      }
+    });
+    const auto = hasCost ? covered - cost : null;
+    return Object.assign({}, r, { total, inv, cost: hasCost ? cost : null, covered, auto, profitShown: auto != null ? auto : r.profit, byType });
+  });
+  recs.forEach((r, i) => { r.prev = recs[i - 1] || null; r.delta = r.prev ? r.total - r.prev.total : null; });
+  const typeColor = {};
+  d.types.forEach((t, i) => { typeColor[t] = 'var(--t' + (i + 1) + ')'; });
+  const authors = new Set(recs.map(r => r.by).filter(Boolean));
+  const px = adjustSplits(d.prices || {});
+  const D = { acc, isInv, recs, latest: recs[recs.length - 1] || null, typeColor, multiUser: authors.size > 1, px, mk: computeMarket(d, recs, px, S.live && S.live.quotes) };
+  return Object.assign(D, buildHistory(D));
+}
+
+/** 每日資產序列（兩次記帳之間用收盤價推算）、連漲連跌、歷史最高、每段記帳區間存了多少 */
+function buildHistory(D) {
+  const recs = D.recs, px = D.px;
+  const codeOf = id => D.acc[id] && D.acc[id].code;
+  const units = recs.map(r => {
+    const u = {};
+    Object.keys(r.entries).forEach(id => {
+      const c = codeOf(id), e = r.entries[id], p = c && px[c] ? priceIn(px[c], r.date) : null;
+      u[id] = p && e.a ? e.a / p.p : null;
+    });
+    return u;
+  });
+  const dateSet = {};
+  Object.keys(px).forEach(c => px[c].d.forEach(x => { dateSet[x] = 1; }));
+  const first = recs.length ? recs[0].date : '9999';
+  const tradeDays = Object.keys(dateSet).filter(x => x >= first).sort();
+  const daily = [];
+  let ri = -1, lastRi = -1, prevDay = null;
+  tradeDays.forEach(day => {
+    while (ri + 1 < recs.length && recs[ri + 1].date <= day) ri++;
+    if (ri < 0) return;
+    let total = 0, mkt = 0;
+    Object.keys(recs[ri].entries).forEach(id => {
+      const u = units[ri][id], c = codeOf(id);
+      total += u == null ? recs[ri].entries[id].a : u * priceIn(px[c], day).p;
+    });
+    if (prevDay && lastRi >= 0) Object.keys(recs[lastRi].entries).forEach(id => {
+      const u = units[lastRi][id], c = codeOf(id);
+      if (u == null) return;
+      const p1 = priceIn(px[c], day), p0 = priceIn(px[c], prevDay);
+      if (p1 && p0) mkt += u * (p1.p - p0.p);
+    });
+    daily.push({ d: day, total, mkt });
+    lastRi = ri; prevDay = day;
+  });
+  let streak = 0;
+  for (let i = daily.length - 1; i >= 1; i--) {
+    const m = daily[i].mkt;
+    if (Math.abs(m) < 1) break;
+    if (streak === 0 || Math.sign(streak) === Math.sign(m)) streak += Math.sign(m); else break;
+  }
+  const points = recs.map(r => ({ date: r.date, total: r.total, profit: r.profitShown }))
+    .concat(daily.map(x => ({ date: x.d, total: x.total })))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  let ath = 0;
+  points.forEach(p => { if (p.total > ath) ath = p.total; });
+  const last = daily[daily.length - 1];
+  const before = last ? points.filter(p => p.date < last.d).reduce((m, p) => Math.max(m, p.total), 0) : 0;
+  const newHigh = !!last && D.mk.ok && last.d === D.mk.date && last.total > before;
+  const saved = [];
+  for (let i = 1; i < recs.length; i++) {
+    const r0 = recs[i - 1], r1 = recs[i];
+    let market = 0, ok = true;
+    Object.keys(r0.entries).forEach(id => {
+      const a = D.acc[id], e = r0.entries[id];
+      if (!a || !D.isInv(id) || !e.a) return;
+      const p0 = a.code && px[a.code] ? priceIn(px[a.code], r0.date) : null, p1 = a.code && px[a.code] ? priceIn(px[a.code], r1.date) : null;
+      if (!p0 || !p1) { ok = false; return; }
+      market += e.a / p0.p * (p1.p - p0.p);
+    });
+    if (ok) saved.push({ date: r1.date, from: r0.date, delta: r1.total - r0.total, market, saved: r1.total - r0.total - market });
+  }
+  return { daily, streak, ath, newHigh, points, saved };
+}
+
+// ═════════ 股娃娃 ═════════
+const GW = { stage: null };
+const pickOne = a => a[Math.floor(Math.random() * a.length)];
+const darkNow = () => S.theme === 'dark' || (S.theme === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+function petState() {
+  const D = S.D, today = S.data.today, lv = (S.data.care || {}).lastVisit;
+  if (S.awayAtOpen == null) S.awayAtOpen = lv && lv < today ? days(lv, today) : 0;
+  const care = Object.assign({ petsToday: 0 }, S.data.care || {}, S.care || {});
+  return GUGU.computeState({
+    ath: D.ath, saved: D.saved.map(x => x.saved), daysSinceRecord: D.latest ? days(D.latest.date, today) : 99, streak: D.streak,
+    care: { daysAway: S.lonelyCleared ? 0 : S.awayAtOpen, petsToday: care.petsToday || 0 },
+  });
+}
+function petFlags() {
+  return GUGU.achievements({ points: S.D.points, goals: S.data.goals, challenges: S.data.challenges || {}, saved: S.D.saved, today: S.data.today });
+}
+const PAGE_MON = { market: { face: 'happy', acc: 'news' }, records: { face: 'happy', acc: 'hat' }, entry: { face: 'happy', acc: 'coin' }, analysis: { face: 'idle', acc: 'glasses' }, settings: { face: 'idle', acc: 'wrench' } };
+function mini(o, cls) { return '<img class="mini ' + (cls || '') + '" alt="" src="' + GUGU.miniURL(Object.assign({ body: S.pet ? S.pet.body : 'normal' }, o)) + '">'; }
+
+// ═════════ 股價估算 ═════════
+/** 某代號在某日（含）之前最後一個價格；早於資料起點 7 天內就用第一筆 */
+function priceIn(s, date) {
+  if (!s || !s.d.length) return null;
+  let lo = 0, hi = s.d.length - 1, ans = -1;
+  while (lo <= hi) { const m = (lo + hi) >> 1; if (s.d[m] <= date) { ans = m; lo = m + 1; } else hi = m - 1; }
+  if (ans < 0) return days(date, s.d[0]) <= 7 ? { d: s.d[0], p: s.p[0] } : null;
+  return { d: s.d[ans], p: s.p[ans] };
+}
+function priceAt(code, date) { return priceIn(S.D.px[code], date); }
+
+/**
+ * 證交所給的是原始價格，股票分割那天價格會突然變成 1/4 之類（例如 0050 在 2025/6 一拆四）。
+ * 偵測單日變成整數倍的跳動，把分割前的價格換算成分割後的基準。
+ */
+function adjustSplits(prices) {
+  const out = {};
+  Object.keys(prices).forEach(code => {
+    const s = prices[code], p = s.p.slice();
+    let k = 1;
+    for (let i = p.length - 1; i > 0; i--) {
+      const r = s.p[i - 1] / s.p[i];
+      const f = Math.round(r >= 1 ? r : 1 / r);
+      if (f >= 2 && Math.abs((r >= 1 ? r : 1 / r) - f) / f < 0.12) k *= r >= 1 ? f : 1 / f;
+      p[i - 1] = s.p[i - 1] / k;
+    }
+    out[code] = { d: s.d, p: p };
+  });
+  return out;
+}
+
+/** 用最近一次記帳的金額 ÷ 當天收盤價推算持有單位，再乘上最新價格 */
+function computeMarket(d, recs, prices, live) {
+  const holdings = [];
+  let est = 0, change = 0, date = '';
+  d.accounts.forEach(a => {
+    if (a.status !== '使用中') return;
+    let i = recs.length - 1;
+    while (i >= 0 && !recs[i].entries[a.id]) i--;
+    if (i < 0) return;
+    const rec = recs[i], e = rec.entries[a.id];
+    const s = a.code && prices[a.code];
+    const base = s && s.d.length >= 2 ? priceIn(s, rec.date) : null;
+    if (!base || !e.a) { est += e.a; return; }
+    const n = s.d.length;
+    let last = { d: s.d[n - 1], p: s.p[n - 1] }, prev = { d: s.d[n - 2], p: s.p[n - 2] };
+    // 盤中即時：證交所報價比最後一筆收盤新，就用它（昨收當比較基準）
+    const q = live && live[a.code];
+    if (q && q.d > last.d) { prev = { d: last.d, p: q.y }; last = { d: q.d, p: q.p, live: true, t: q.t }; }
+    const units = e.a / base.p;
+    const value = last.d > rec.date ? units * last.p : e.a;
+    const c = units * (last.p - prev.p);
+    holdings.push({ acc: a, units, last, prev, value, change: c, pct: last.p / prev.p - 1, recDate: rec.date });
+    est += value;
+    change += c;
+    if (last.d > date) date = last.d;
+  });
+  const lives = holdings.filter(h => h.last.live);
+  // 盤中：還沒有今天價格的（基金淨值）不算進「今天」的漲跌，避免把前一天的變動混進來
+  if (lives.length) {
+    holdings.forEach(h => { if (!h.last.live) h.pending = true; });
+    change = holdings.filter(h => !h.pending).reduce((t, h) => t + h.change, 0);
+  }
+  return { holdings, est, change, pct: holdings.length ? change / (est - change) : 0, date, ok: holdings.length > 0, newer: holdings.some(h => h.last.d > h.recDate),
+    live: lives.length > 0, liveAt: lives.length ? lives.map(h => h.last.t).sort().pop() : '' };
+}
+
+// ═════════ 今日心情 ═════════
+const THINGS = [['杯珍奶', 60], ['個便當', 110], ['張電影票', 330], ['頓火鍋', 800], ['趟高鐵台北↔高雄來回', 2980], ['副 AirPods', 7490], ['張台北↔東京來回機票', 15000], ['支 iPhone', 36900]];
+function equiv(n) {
+  const a = Math.abs(n);
+  if (a < 60) return null;
+  let pick = THINGS[0];
+  THINGS.forEach(t => { if (a >= t[1]) pick = t; });
+  const k = a / pick[1];
+  return (k < 10 ? String(Math.round(k * 10) / 10) : String(Math.round(k))) + ' ' + pick[0];
+}
+const MOODS = {
+  up: [['小漲，穩穩的。', '今天有一點點甜。'], ['市場今天很給面子！', '今天的你比昨天更有錢。'], ['大漲日！今天可以加個菜 🎉', '恭喜！這種日子值得記住。']],
+  down: [['小跌而已，風一吹就過了。', '只是一點小雜訊。'], ['今天有點涼，抱一下。', '跌了一些，泡杯茶就好。'], ['大跌日。深呼吸，長期來看這只是一個小坑。', '今天很難熬，但你本來就打算放很久。']],
+};
+function moodLevel(p) { const a = Math.abs(p); return a < 0.005 ? 0 : a < 0.015 ? 1 : 2; }
+function moodMsg(mk) {
+  if (Math.abs(mk.pct) < 0.0005) return '今天幾乎沒動，平靜的一天。';
+  const list = MOODS[mk.change > 0 ? 'up' : 'down'][moodLevel(mk.pct)];
+  return list[(+mk.date.replace(/-/g, '')) % list.length];
+}
+
+/** 某帳戶在某筆紀錄（含）之前最後一次的金額與成本 */
+function lastKnown(id, beforeIdx) {
+  const recs = S.D.recs;
+  let a = null, c = null;
+  for (let i = beforeIdx; i >= 0; i--) {
+    const e = recs[i].entries[id];
+    if (!e) continue;
+    if (a === null) a = e.a;
+    if (c === null && e.c != null) c = e.c;
+    if (a !== null && c !== null) break;
+  }
+  return { a, c };
+}
+
+function inRange(recs) {
+  if (!recs.length || S.range === 'all') return recs;
+  const last = recs[recs.length - 1].date;
+  const from = S.range === 'ytd' ? last.slice(0, 4) + '-01-01' : (+last.slice(0, 4) - 1) + last.slice(4);
+  // 往前多帶一筆當起點，線才會從區間開頭接起來
+  const i = recs.findIndex(r => r.date >= from);
+  return recs.slice(Math.max(0, i - (S.range === 'ytd' ? 1 : 0)));
+}
+
+function goalInfo() {
+  const { recs, latest } = S.D;
+  const year = (latest ? latest.date : S.data.today).slice(0, 4);
+  const goal = S.data.goals[year] || null;
+  const thisYear = recs.filter(r => r.date.slice(0, 4) === year);
+  const prevYear = recs.filter(r => r.date.slice(0, 4) < year);
+  const base = prevYear.length ? prevYear[prevYear.length - 1] : thisYear[0];
+  const cur = thisYear[thisYear.length - 1] || null;
+  let proj = null;
+  if (base && cur && days(base.date, cur.date) >= 30) {
+    const rate = (cur.total - base.total) / days(base.date, cur.date);
+    proj = cur.total + rate * Math.max(0, days(cur.date, year + '-12-31'));
+  }
+  const mk = S.D.mk;
+  const now = mk.ok && mk.newer && mk.date.slice(0, 4) === year ? mk.est : (cur ? cur.total : 0);
+  return { year, goal, challenge: (S.data.challenges || {})[year] || null, cur, base, proj, now, ytd: base && cur ? now - base.total : null };
+}
+
+// ═════════ 畫面切換 ═════════
+const TITLES = { home: '總覽', market: '市場', records: '紀錄', entry: '記一筆', analysis: '分析', settings: '設定' };
+function go(view, opts) {
+  if (view === 'entry') { S.edit = opts && opts.edit ? opts.edit : null; S.showClosed = false; }
+  S.view = view;
+  closeSheet();
+  render();
+  window.scrollTo(0, 0);
+}
+function render() {
+  if (GW.stage) { GW.stage.stop(); GW.stage.page.clear(); GW.stage = null; }
+  S.charts.forEach(c => c.destroy());
+  S.charts = [];
+  $$('[data-go]').forEach(b => b.classList.toggle('on', b.dataset.go === S.view));
+  $('#btn-eye').innerHTML = icon(S.hidden ? 'eyeoff' : 'eye');
+  paintIcons(document.querySelector('.sidebar')); paintIcons(document.querySelector('.tabbar')); paintIcons(document.querySelector('.topbar'));
+  const v = $('#view');
+  if (!S.data) { $('#title').textContent = '股娃娃'; v.innerHTML = skeleton(); return; }
+  if (S.data.needsSetup) { $('#title').textContent = '股娃娃'; v.innerHTML = setupView(); return; }
+  S.pet = petState();
+  S.flagsList = petFlags();
+  const title = S.view === 'entry' && S.edit ? '編輯紀錄' : TITLES[S.view];
+  $('#title').innerHTML = (PAGE_MON[S.view] ? mini(PAGE_MON[S.view], 'sm bob') : '') + esc(title);
+  const fn = { home: homeView, market: marketView, records: recordsView, entry: entryView, analysis: analysisView, settings: settingsView }[S.view];
+  v.innerHTML = '<div class="fade-in">' + fn() + '</div>';
+  paintIcons(v);
+  ({ home: mountHome, market: mountMarket, records: mountRecords, entry: mountEntry, analysis: mountAnalysis, settings: mountSettings })[S.view]();
+}
+function skeleton() {
+  return '<div class="empty" style="padding:28px 0 18px"><img class="mini bob" alt="" src="' + GUGU.miniURL({ face: 'happy', walk: true }) + '">股娃娃正在搬資料…</div><div class="grid"><div class="skel span2" style="height:190px"></div><div class="skel" style="height:170px"></div><div class="skel" style="height:170px"></div><div class="skel span2" style="height:280px"></div></div>';
+}
+function setupView() {
+  return '<div class="card" style="max-width:560px"><div class="card-h"><h2>還沒有搬移資料</h2></div>' +
+    '<p class="sub">請回到 Apps Script 編輯器，在上方選擇函式「runMigration」後按「執行」。完成後回到這裡按右上角的重新整理。</p></div>';
+}
+function rangeSeg() {
+  return '<div class="seg" data-range>' + [['ytd', '今年'], ['1y', '近一年'], ['all', '全部']].map(([k, l]) =>
+    '<button data-r="' + k + '" class="' + (S.range === k ? 'on' : '') + '">' + l + '</button>').join('') + '</div>';
+}
+function bindRange() {
+  $$('[data-range] button').forEach(b => b.onclick = () => { S.range = b.dataset.r; store.set('range', S.range); render(); });
+}
+
+// ═════════ 總覽 ═════════
+function homeView() {
+  const { latest } = S.D;
+  if (!latest) return '<div class="card empty">' + mini({ face: 'happy' }, 'bob') + '還沒有任何紀錄，按下方「＋」記第一筆吧。</div>';
+  return '<div class="grid">' + heroCard(latest) + todayCard() + goalCard() + investCard() +
+    '<section class="card span2"><div class="card-h">' + icon('chart') + '<h2>總資產走勢</h2>' + rangeSeg() + '</div><div class="chart tall"><canvas id="c-trend"></canvas></div></section>' +
+    allocCard(latest) + accountsCard(latest) + '</div>';
+}
+function heroCard(r) {
+  const mk = S.D.mk, est = mk.ok && mk.newer, st = S.pet;
+  return '<div class="block span2" id="hero"><section class="face hero">' + heroInner(r) +
+    '<div class="hero-meta">' + (S.D.newHigh ? '今天創下歷史新高！' : '歷史最高 ' + wan(S.D.ath)) + '，家園：' + st.levelName + (st.nextLevel ? '（' + wan(st.nextLevel[0]) + ' 升級）' : '') + '</div></section></div>';
+}
+function heroInner(r) {
+  const mk = S.D.mk, est = mk.ok && mk.newer;
+  const label = mk.live ? (marketOpenNow() ? '盤中即時 ' + mk.liveAt.slice(0, 5) : '依今日收盤估算') : est ? '依 ' + fmtD(mk.date) + ' 收盤估算' : fmtD(r.date);
+  return '<div id="hero-live"><div class="hero-top"><span>總資產</span><span>' + (mk.live && marketOpenNow() ? '<i class="live-dot"></i>' : '') + label + '</span></div>' +
+    '<div class="hero-num"><small>NT$</small>' + money(est ? mk.est : r.total) + '</div>' +
+    (mk.ok ? deltaPill(mk.change, mk.est - mk.change, '較前一交易日') : deltaPill(r.delta, r.prev && r.prev.total, r.prev ? '較 ' + shortD(r.prev.date) : '')) + '</div>';
+}
+function todayBody() {
+  const mk = S.D.mk;
+  let body;
+  if (mk.ok) {
+    const max = Math.max(...mk.holdings.filter(h => !h.pending).map(h => Math.abs(h.change)), 1);
+    const rows = mk.holdings.slice().sort((a, b) => (a.pending - b.pending) || Math.abs(b.change) - Math.abs(a.change)).map(h => {
+      if (h.pending) return '<div class="contrib-row"><span class="nm">' + esc(h.acc.name) + '</span><div class="cbar"></div><span class="amt muted" style="font-weight:500">淨值收盤後公布</span></div>';
+      const bar = '<i style="background:var(--' + (h.change >= 0 ? 'up' : 'down') + ');width:' + (Math.abs(h.change) / max * 50) + '%;' + (h.change >= 0 ? 'left:50%' : 'right:50%') + '"></i>';
+      return '<div class="contrib-row"><span class="nm">' + esc(h.acc.name) + '</span><div class="cbar">' + bar + '</div>' +
+        '<span class="amt num ' + dir(h.change) + '">' + signed(h.change) + '<small>' + (h.pct >= 0 ? '+' : '') + pct(h.pct, 2) + '</small></span></div>';
+    }).join('');
+    const eq = equiv(mk.change);
+    const lagged = mk.holdings.filter(h => h.last.d < mk.date && !h.pending).map(h => h.acc.name + ' 為 ' + shortD(h.last.d) + ' 淨值');
+    const when = mk.live ? (marketOpenNow() ? '<i class="live-dot"></i>盤中即時 ' + mk.liveAt.slice(0, 5) : fmtD(mk.date) + ' 收盤') : fmtD(mk.date) + ' 收盤';
+    body = '<div class="today-head"><h2>今天</h2><span>' + when + (S.D.streak >= 2 ? '，' + S.D.streak + ' 連漲' : S.D.streak <= -2 ? '，' + -S.D.streak + ' 連跌' : '') + '</span></div>' +
+      '<div class="today-main"><span class="today-amt ' + dir(mk.change) + '">' + signed(mk.change) + '</span><span class="today-pct ' + dir(mk.change) + '">' + (mk.pct >= 0 ? '+' : '') + pct(mk.pct, 2) + '</span></div>' +
+      '<p class="today-msg">' + moodMsg(mk) + '</p>' +
+      (eq && !S.hidden ? '<p class="today-eq">' + (mk.change > 0 ? '賺了大約 ' : '少了大約 ') + eq + '</p>' : '') +
+      '<div class="contrib">' + rows + '</div>' +
+      '<div class="today-foot">' + (lagged.length ? lagged.join('，') + '。' : '') + (mk.live ? '開盤時間每 20 秒更新一次，基金淨值收盤後才公布。' : '開盤時間打開會即時更新，收盤後以當天收盤價為準。') + '</div>';
+  } else {
+    body = '<div class="today-head"><h2>今天</h2></div><p class="sub" style="margin:6px 0 0">幫投資帳戶填上股價代號後，這裡會每天顯示資產漲跌。</p>';
+  }
+  return body;
+}
+function todayCard() {
+  const body = todayBody();
+  return '<section class="card today span2" id="today-card"><div class="stage-wrap"><canvas class="stage" id="stage" aria-label="股娃娃的家園：點牠摸摸、長按看狀態、左右滑參觀"></canvas>' +
+    '<div class="gw-bubble" id="gw-bubble"></div></div><div class="today-body" id="today-body">' + body + '</div></section>';
+}
+function goalCard() {
+  const g = goalInfo();
+  if (!g.goal) {
+    return '<section class="card"><div class="card-h">' + icon('target', null, '#E5484D') + '<h2>' + g.year + ' 年度目標</h2></div><div class="empty">' + mini({ face: 'idle', acc: 'question' }, 'bob') + '還沒設定今年的目標<button class="btn small primary" data-go-goal>設定目標</button></div></section>';
+  }
+  const total = g.now, p = total / g.goal.amount, gap = g.goal.amount - total;
+  const scale = g.challenge ? g.challenge.amount : g.goal.amount;
+  const fill = Math.min(100, total / scale * 100), mark = g.goal.amount / scale * 100;
+  return '<section class="card"><div class="card-h">' + icon('target', null, '#E5484D') + '<h2>' + g.year + ' ' + esc(g.goal.name) + '</h2><span class="hint">' + wan(g.goal.amount) + (g.challenge ? '，挑戰 ' + wan(g.challenge.amount) : '') + '</span></div>' +
+    '<div class="goal-top"><div class="goal-pct">' + Math.floor(p * 100) + '<small>%</small></div><div class="sub" style="padding-bottom:4px">' + (p >= 1 ? '已達成！' : '還差 ' + money(gap)) + '</div></div>' +
+    '<div class="pxbar"><div class="track"><div class="fill" style="width:' + fill + '%"></div></div>' +
+    (g.challenge ? '<div class="mark" style="left:' + mark + '%" title="年度目標"></div>' : '') + '</div>' +
+    (g.challenge ? '<p class="muted" style="font-size:12px;margin:0">整條是挑戰目標，金色刻度是年度目標</p>' : '') +
+    '<div class="kv">' +
+    '<div><span class="k">今年增加</span><span class="v num ' + dir(g.ytd) + '">' + signed(g.ytd) + '</span></div>' +
+    '<div><span class="k">年底預估</span><span class="v num">' + (g.proj == null ? '<span class="muted">資料不足</span>' : money(g.proj)) + '</span></div>' +
+    (g.proj != null ? '<div><span class="k">預估達成</span><span class="v">' + pct(g.proj / g.goal.amount, 0) + '</span></div>' : '') +
+    (g.challenge ? '<div><span class="k">挑戰目標</span><span class="v">' + pct(total / g.challenge.amount, 0) + '</span></div>' : '') +
+    '</div></section>';
+}
+function investCard() {
+  const r = S.D.latest;
+  if (r.cost == null) {
+    const lastManual = S.D.recs.slice().reverse().find(x => x.profit != null);
+    return '<section class="card"><div class="card-h">' + icon('stock') + '<h2>投資</h2></div><div class="stats">' +
+      '<div class="stat"><div class="k">投資市值</div><div class="v num">' + money(r.inv) + '</div></div>' +
+      '<div class="stat"><div class="k">獲利總額' + (lastManual ? '（' + shortD(lastManual.date) + ' 手填）' : '') + '</div><div class="v num">' + (lastManual ? money(lastManual.profit) : '—') + '</div></div></div>' +
+      '<div class="note-box">還沒有投入成本資料。下次記帳時在各投資帳戶填入「投入成本」，就會自動算出報酬率。</div></section>';
+  }
+  const partial = r.covered < r.inv;
+  return '<section class="card"><div class="card-h">' + icon('stock') + '<h2>投資</h2><span class="hint">' + fmtD(r.date) + '</span></div><div class="stats">' +
+    '<div class="stat"><div class="k">投資市值</div><div class="v num">' + money(r.inv) + '</div></div>' +
+    '<div class="stat"><div class="k">投入成本</div><div class="v num">' + money(r.cost) + '</div></div>' +
+    '<div class="stat"><div class="k">未實現損益</div><div class="v num ' + dir(r.auto) + '">' + signed(r.auto) + '</div></div>' +
+    '<div class="stat"><div class="k">報酬率</div><div class="v num ' + dir(r.auto) + '">' + pct(r.auto / r.cost) + '</div></div></div>' +
+    (partial ? '<div class="note-box">有些投資帳戶還沒填成本，損益只計算已填成本的帳戶。</div>' : '') + '</section>';
+}
+function allocCard(r) {
+  const types = S.data.types.filter(t => r.byType[t] > 0);
+  const rows = types.map(t => '<div class="alloc-row">' + typeIcon(t) + '<span>' + t + '</span><span class="p">' + pct(r.byType[t] / r.total) + '</span><span class="a num">' + money(r.byType[t]) + '</span></div>').join('');
+  // 20 格，每格 5%，用最大餘數法分配格數
+  const raw = types.map(t => r.byType[t] / r.total * 20);
+  const cells = raw.map(Math.floor);
+  raw.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0]).slice(0, 20 - cells.reduce((a, b) => a + b, 0)).forEach(([, i]) => cells[i]++);
+  const blocks = types.map((t, i) => Array.from({ length: cells[i] }, () => '<i style="background:' + S.D.typeColor[t] + '" title="' + t + '"></i>').join('')).join('');
+  return '<section class="card"><div class="card-h">' + icon('pie', null, '#3CCBAA') + '<h2>資產配置</h2><span class="hint">一格 5%</span></div>' +
+    '<div class="hp-total"><b>' + wan(r.total) + '</b><span>總資產</span></div><div class="hpbar" role="img" aria-label="資產配置">' + blocks + '</div><div class="alloc-list">' + rows + '</div></section>';
+}
+function accountsCard(r) {
+  const D = S.D, idx = D.recs.length - 1;
+  let html = '';
+  S.data.types.forEach(t => {
+    const list = S.data.accounts.filter(a => a.type === t && a.status === '使用中');
+    if (!list.length) return;
+    html += '<div class="group-h">' + typeIcon(t) + t + '</div>';
+    list.forEach(a => {
+      const e = r.entries[a.id];
+      const prev = r.prev && r.prev.entries[a.id];
+      const d = e && prev ? e.a - prev.a : null;
+      html += '<button class="row" data-acc="' + a.id + '"><div class="main"><div class="t">' + esc(a.name) + '</div>' +
+        (e ? '' : '<div class="s">這次沒有記錄，最後一次 ' + money(lastKnown(a.id, idx).a) + '</div>') + '</div>' +
+        '<div class="r"><div class="t num">' + (e ? money(e.a) : '—') + '</div>' + (d ? '<div class="s num ' + dir(d) + '">' + signed(d) + '</div>' : '') + '</div><span class="muted" data-icon="chevron"></span></button>';
+    });
+  });
+  return '<section class="card"><div class="card-h">' + icon('bank') + '<h2>帳戶</h2><span class="hint">點選看走勢</span></div><div class="list">' + html + '</div></section>';
+}
+function mountHome() {
+  if (!S.D.latest) return;
+  bindRange();
+  const recs = S.D.recs;
+  const rr = inRange(recs);
+  S.charts.push(lineChart($('#c-trend'), [{ label: '總資產', color: css('--t1'), points: rr.map(r => ({ x: ts(r.date), y: r.total })), fill: true }]));
+  $$('[data-acc]').forEach(b => b.onclick = () => openAccount(b.dataset.acc));
+  const gg = $('[data-go-goal]');
+  if (gg) gg.onclick = () => go('settings');
+  mountStage();
+}
+
+/** 把股娃娃的舞台放進「今天」卡片 */
+function mountStage() {
+  const cv = $('#stage');
+  if (!cv) return;
+  const stage = GUGU.mount(cv, {
+    bubble: $('#gw-bubble'), heroEl: () => $('#hero'), leakEl: () => $('#today-body'),
+    onLongPress: openPetStatus, onTap: petTouched,
+  });
+  GW.stage = stage;
+  stage.setTheme(darkNow() ? 'dark' : 'light');
+  stage.setState(S.pet);
+  stage.setFlags(S.flagsList);
+  stage.setToday(S.D.mk.ok ? S.D.mk.pct : 0);
+  stage.start();
+  if (S.D.newHigh && (S.fxPlayed === S.D.mk.date || store.get('fxPlayed', '') === S.D.mk.date)) stage.page.plantFlag($('#hero'));
+  if (S.pendingEat) { S.pendingEat = false; setTimeout(() => stage.play('eat'), 400); setTimeout(() => talk(stage), 4000); return; }
+  if (S.fresh && S.liveTried) autoplay(stage);
+}
+function sceneFor(mk) {
+  if (!mk.ok || Math.abs(mk.pct) < 0.0005) return null;
+  return (mk.change > 0 ? 'up' : 'down') + (moodLevel(mk.pct) + 1);
+}
+/** 每天第一次打開：播今天的演出（創新高優先插旗），之後股娃娃主動說一句話 */
+function autoplay(stage) {
+  if (GW.autoplayed === stage) return;
+  GW.autoplayed = stage;
+  const key = S.D.mk.ok ? S.D.mk.date : S.data.today;
+  const played = S.fxPlayed === key || store.get('fxPlayed', '') === key;
+  if (!played && !S.quiet && !S.pet.lonely) {
+    S.fxPlayed = key; store.set('fxPlayed', key);
+    const scene = S.D.newHigh ? 'flag' : sceneFor(S.D.mk);
+    if (scene) { setTimeout(() => stage.play(scene), 500); setTimeout(() => talk(stage), 7500); return; }
+  }
+  setTimeout(() => talk(stage), 1200);
+}
+function talk(stage) {
+  if (S.quiet || GW.stage !== stage || stage.state.scene) return;
+  const st = S.pet, D = S.D, lines = [];
+  if (st.lonely) lines.push(S.awayAtOpen + ' 天沒見了…點點我');
+  else {
+    const fresh = S.flagsList.filter(f => f.fresh);
+    if (fresh.length) lines.push('新的紀念旗：' + fresh[fresh.length - 1].label + '！');
+    if (D.streak >= 3) lines.push(D.streak + ' 連漲！我好圓～');
+    if (D.streak <= -3) lines.push('連跌 ' + -D.streak + ' 天了，肚子好餓…');
+    const ds = D.latest ? days(D.latest.date, S.data.today) : 0;
+    if (ds >= 21) lines.push(ds + ' 天沒記帳了，記一下嘛');
+    if (st.nextLevel && st.nextLevel[0] - D.ath < 150000) lines.push('再 ' + wan(st.nextLevel[0] - D.ath) + ' 就能升級成「' + st.nextLevel[1] + '」！');
+    if (!lines.length) lines.push(pickOne(['今天也辛苦了', '摸摸我會變開心喔', '左右滑可以參觀我們家', '長按我可以看紀念冊']));
+  }
+  stage.say(lines[0], 4.5);
+}
+function petTouched() {
+  if (S.pet.lonely) { S.lonelyCleared = true; S.pet = petState(); if (GW.stage) GW.stage.setState(S.pet); }
+  api('touchCare', 'pet').then(c => { S.care = c; S.pet = petState(); if (GW.stage) GW.stage.setState(S.pet); }).catch(() => {});
+}
+function openPetStatus() {
+  const st = S.pet, D = S.D, flags = S.flagsList.slice().reverse();
+  const meter = (label, v, color) => '<div class="meter"><span>' + label + '</span><div class="track"><i style="width:' + v + '%;background:' + color + '"></i></div><span class="num">' + v + '</span></div>';
+  const log = [
+    D.streak > 0 ? '市場已經連漲 ' + D.streak + ' 天' : D.streak < 0 ? '市場已經連跌 ' + -D.streak + ' 天' : '市場最近持平',
+    '最近 3 次記帳有 ' + st.lush + ' 次存到錢' + (st.lush >= 2 ? '，花園長得很好' : '，花草需要多一點照顧'),
+    st.nextLevel ? '資產最高點到 ' + wan(st.nextLevel[0]) + ' 就能升級成「' + st.nextLevel[1] + '」（還差 ' + wan(st.nextLevel[0] - D.ath) + '）' : '家園已經是最高級的城堡了',
+  ];
+  const scene = S.D.newHigh ? 'flag' : sceneFor(S.D.mk);
+  openSheet('<div class="sheet-h"><h3>' + GUGU.NAME + '</h3><button class="icon-btn" data-close aria-label="關閉">' + icon('x', 'inv') + '</button></div>' +
+    '<div class="gw-status-h">' + mini({ face: st.mood >= 70 ? 'happy' : st.mood <= 30 ? 'sad' : 'idle' }) + '<div><b>家園 Lv.' + st.level + '：' + st.levelName + '</b><span>點牠摸摸、長按看這張卡、左右滑參觀家園</span></div></div>' +
+    meter('心情', st.mood, '#FF8FA3') + meter('飽足', st.fullness, '#FFC94A') +
+    '<ul class="gw-log">' + log.map(l => '<li>' + esc(l) + '</li>').join('') + '</ul>' +
+    '<div class="group-h" style="margin-top:10px">紀念冊（' + flags.length + ' 面旗）</div>' +
+    (flags.length ? '<ul class="gw-log">' + flags.map(f => '<li><i style="background:' + f.color + '"></i><span style="flex:1">' + esc(f.label) + '</span><span class="muted num">' + fmtD(f.date) + '</span></li>').join('') + '</ul>' : '<p class="muted" style="font-size:13px">還沒有紀念旗，資產每突破 50 萬就會插一面。</p>') +
+    '<div class="btn-row" style="margin-top:16px">' + (scene ? '<button class="btn primary" id="gw-replay">重播今天的演出</button>' : '') + '<button class="btn" data-close>關閉</button></div>');
+  const rb = $('#gw-replay');
+  if (rb) rb.onclick = () => { closeSheet(); if (GW.stage) setTimeout(() => GW.stage.play(scene), 250); };
+}
+
+// ═════════ 圖表共用 ═════════
+const crosshair = {
+  id: 'crosshair',
+  afterDatasetsDraw(chart) {
+    if (chart.config.type !== 'line' || !chart.options.plugins.tooltip.enabled) return;
+    const a = chart.tooltip && chart.tooltip.getActiveElements();
+    if (!a || !a.length) return;
+    const x = a[0].element.x, { top, bottom } = chart.chartArea, ctx = chart.ctx;
+    ctx.save(); ctx.strokeStyle = css('--axis'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke(); ctx.restore();
+  },
+};
+function alpha(c, a) {
+  const m = c.match(/^#(..)(..)(..)$/);
+  return m ? 'rgba(' + parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16) + ',' + a + ')' : c;
+}
+function tooltipBase() {
+  return {
+    backgroundColor: css('--surface'), titleColor: css('--text'), bodyColor: css('--text2'), borderColor: css('--ink'), borderWidth: 2,
+    padding: 10, cornerRadius: 0, boxWidth: 8, boxHeight: 8, boxPadding: 4, usePointStyle: true, pointStyle: 'rect', titleFont: PX_FONT, bodyFont: { size: 13, weight: '600' },
+  };
+}
+const PX_FONT = { family: '"Jersey 10", system-ui, sans-serif', size: 15 };
+function axes(stacked, series) {
+  const muted = css('--muted');
+  const xs = [].concat(...series.map(s => s.points.map(p => p.x)));
+  return {
+    x: { type: 'linear', min: Math.min(...xs), max: Math.max(...xs), grid: { display: false }, border: { color: css('--axis'), width: 2 }, ticks: { color: muted, font: PX_FONT, maxTicksLimit: 6, maxRotation: 0, callback: v => { const d = new Date(v); return d.getUTCFullYear() + '/' + (d.getUTCMonth() + 1); } } },
+    y: { stacked: !!stacked, grid: { color: css('--grid') }, border: { display: false }, ticks: { color: muted, font: PX_FONT, maxTicksLimit: 5, callback: v => wan(v) } },
+  };
+}
+/** series = [{label, color, points:[{x,y}], fill}] */
+function lineChart(el, series, opts = {}) {
+  const surface = css('--surface');
+  return new Chart(el, {
+    type: 'line',
+    plugins: [crosshair],
+    data: {
+      datasets: series.map((s, i) => ({
+        label: s.label, data: s.points, borderColor: s.color, backgroundColor: opts.stacked ? alpha(s.color, .78) : alpha(s.color, .1),
+        fill: opts.stacked ? (i === 0 ? 'origin' : '-1') : !!s.fill, borderWidth: opts.stacked ? 1.5 : 2,
+        pointRadius: s.points.length === 1 ? 4 : 0, pointHoverRadius: 5, pointBackgroundColor: s.color, pointHoverBorderWidth: 2, pointHoverBorderColor: surface,
+        tension: 0, spanGaps: true, pointStyle: 'rect', borderJoinStyle: 'miter',
+      })),
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 350 },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: Object.assign(tooltipBase(), { callbacks: { title: it => tsLabel(it[0].parsed.x), label: c => ' ' + c.dataset.label + '  ' + money(c.parsed.y) } }),
+      },
+      scales: axes(opts.stacked, series),
+    },
+  });
+}
+function legendHtml(items) {
+  return '<div class="legend">' + items.map(([label, color]) => '<span><span class="dot" style="background:' + color + '"></span>' + esc(label) + '</span>').join('') + '</div>';
+}
+
+// ═════════ 市場 ═════════
+const big = v => nf.format(Math.round(v));
+const IND_META = {
+  TAIEX: { name: '台股加權指數', fmt: big },
+  '2330': { name: '台積電', fmt: v => nf.format(v) },
+  FOREIGN: { name: '外資買賣超', fmt: v => (v >= 0 ? '+' : '−') + (Math.abs(v) / 1e8).toFixed(1) + ' 億', flow: true },
+  '^SOX': { name: '費城半導體', fmt: big },
+  '^GSPC': { name: 'S&P 500', fmt: big },
+  '^IXIC': { name: '那斯達克', fmt: big },
+  '^VIX': { name: 'VIX 恐慌指數', fmt: v => v.toFixed(1), calm: true },
+  'TWD=X': { name: '美元兌台幣', fmt: v => v.toFixed(2), fx: true },
+};
+// 數字代號（2330）會被 JavaScript 自動排到物件最前面，所以順序另外寫
+const IND_ORDER = ['TAIEX', '2330', 'FOREIGN', '^SOX', '^GSPC', '^IXIC', '^VIX', 'TWD=X'];
+/** 你的資產有多少比例跟著台股走（正二算兩倍） */
+function exposure() {
+  const mk = S.D.mk;
+  if (!mk.ok || !mk.est) return null;
+  let e = 0;
+  mk.holdings.forEach(h => { e += h.value * (h.acc.code === '00631L' ? 2 : 1); });
+  return e / mk.est;
+}
+function indSeries(id) {
+  const s = (S.data.indicators || {})[id];
+  const q = S.live && S.live.quotes && S.live.quotes[id];
+  if (q && (!s || q.d > s.d[s.d.length - 1])) {
+    const base = s || { d: [], v: [] };
+    const d = base.d.concat(q.d), v = base.v.concat(q.p);
+    if (v.length === 1) { d.unshift(''); v.unshift(q.y); }
+    else v[v.length - 2] = q.y; // 昨收以證交所為準
+    return { d, v, live: q.t };
+  }
+  return s && s.v.length >= 2 ? s : null;
+}
+function indText(id, s) {
+  const n = s.v.length, last = s.v[n - 1], prev = s.v[n - 2], ch = last / prev - 1;
+  const updown = ch >= 0 ? '漲 ' + pct(ch, 2) : '跌 ' + pct(-ch, 2);
+  switch (id) {
+    case 'TAIEX': {
+      const e = exposure();
+      return '台股今天' + updown + '。' + (e ? '你的資產大約 ' + pct(e, 0) + ' 跟著台股走（正二算兩倍），台股每動 1%，你大約變動 ' + wan(S.D.mk.est * e * 0.01) + '。' : '');
+    }
+    case '2330': return '台積電是台股權重最大的公司，也是 0050、006208 裡比重最高的成分股，它的漲跌常常決定台股的方向。';
+    case 'FOREIGN': return '外資今天' + (last >= 0 ? '買超 ' : '賣超 ') + (Math.abs(last) / 1e8).toFixed(1) + ' 億。外資是外國的大型投資機構，買超代表他們買的比賣的多，通常對台股是支撐；連續賣超時，大盤比較容易往下。';
+    case '^SOX': return '美國半導體公司的指數，跟台積電等台灣科技股關係最密切。費半大漲，隔天台股科技股通常比較有精神。';
+    case '^GSPC': return '美國 500 家大公司的綜合表現，是全球股市的風向球。美股晚上的走勢常影響台股隔天開盤。';
+    case '^IXIC': return '以科技股為主的美國指數，跟 AI、半導體題材關係很深。';
+    case '^VIX': return '現在 ' + last.toFixed(1) + '：' + (last < 15 ? '市場很平靜。' : last < 20 ? '大致正常。' : last < 30 ? '大家有點緊張。' : '市場很恐慌。') + '這個數字越高代表大家越害怕，大跌時通常會飆高。';
+    case 'TWD=X': return '1 美元換 ' + last.toFixed(2) + ' 台幣。數字變大代表台幣變弱，台幣變弱時外資常會賣台股換回美元。明年出國要換美金，數字越小越划算。';
+  }
+  return '';
+}
+function marketView() {
+  const news = (S.data.news || []).slice();
+  const latest = news.map(n => n.date).sort().pop();
+  const today = news.filter(n => n.date === latest);
+  const head = today.find(n => n.cat === '總覽');
+  const tw = indSeries('TAIEX'), fi = indSeries('FOREIGN');
+  const fallback = tw ? '台股' + (tw.v[tw.v.length - 1] >= tw.v[tw.v.length - 2] ? '漲' : '跌') + ' ' + pct(Math.abs(tw.v[tw.v.length - 1] / tw.v[tw.v.length - 2] - 1), 2) + (fi ? '，外資' + (fi.v[fi.v.length - 1] >= 0 ? '買超 ' : '賣超 ') + (Math.abs(fi.v[fi.v.length - 1]) / 1e8).toFixed(0) + ' 億' : '') : '今天的資料還在路上';
+  let html = '<section class="card anchor"><div class="peek" style="margin:0">' + mini({ face: 'happy', acc: 'news' }, 'bob') +
+    '<div class="gw-say">' + esc(head ? head.title : fallback) + '</div></div></section>';
+  html += '<div class="sec-h">' + icon('chart') + '<h2>今日指標</h2><span class="hint">點卡片看它跟你的關係</span></div><div class="ind-grid">';
+  IND_ORDER.forEach(id => {
+    const m = IND_META[id], s = indSeries(id);
+    if (!s) { html += '<div class="ind card"><div class="ind-n">' + m.name + '</div><div class="ind-v muted">—</div><div class="ind-d muted">還沒有資料</div></div>'; return; }
+    const n = s.v.length, last = s.v[n - 1], prev = s.v[n - 2];
+    const ch = m.flow ? last : last / prev - 1;
+    // VIX、匯率的漲跌好壞不直觀，用中性色只看箭頭
+    const cls = m.flow ? dir(ch) : m.calm || m.fx ? 'flat' : dir(ch);
+    html += '<button class="ind card" data-ind="' + id + '"><div class="ind-n">' + m.name + '</div><div class="ind-v">' + m.fmt(last) + '</div>' +
+      '<div class="ind-d ' + cls + '">' + (m.flow ? (ch >= 0 ? '買超' : '賣超') : (ch >= 0 ? '▲ ' : '▼ ') + pct(Math.abs(ch), 2)) + '<span class="muted"> ' + (s.live && marketOpenNow() ? '盤中 ' + s.live.slice(0, 5) : shortD(s.d[n - 1])) + '</span></div>' +
+      '<canvas class="spark px" width="48" height="14" data-spark="' + id + '"></canvas></button>';
+  });
+  html += '</div>';
+  html += '<div class="sec-h">' + icon('news') + '<h2>今日新聞</h2><span class="hint">' + (latest ? shortD(latest) + ' 早上整理' : '') + '</span></div>';
+  if (!today.length) html += '<div class="card empty">' + mini({ face: 'idle', acc: 'news' }, 'bob') + '今天的新聞還沒送到，早上 9:30 之後再來看看。</div>';
+  const order = ['總覽', '大盤', '頭條', '持股'];
+  today.sort((a, b) => order.indexOf(a.cat) - order.indexOf(b.cat)).forEach((n, i) => {
+    const tags = n.tags ? n.tags.split(/[、,，]/).filter(Boolean).map(t => '<span class="tag">' + esc(t.trim()) + '</span>').join('') : '';
+    html += '<article class="card news' + (n.cat === '總覽' ? ' lead' : '') + '"><div class="news-cat">' + esc(n.cat) + '</div><h3>' + esc(n.title) + '</h3>' +
+      '<p class="news-body' + (n.cat === '總覽' ? '' : ' clamp') + '">' + esc(n.body) + '</p>' + (n.cat === '總覽' ? '' : '<button class="link" data-more>展開全文</button>') +
+      '<div class="news-meta">' + tags + '<span class="muted">' + esc(n.source) + '</span>' + (n.url ? '<a class="link" href="' + esc(n.url) + '" target="_blank" rel="noopener">看原文</a>' : '') + '</div></article>';
+  });
+  html += '<p class="muted" style="font-size:12px;margin:14px 2px 0">這裡只說明發生了什麼、可能有什麼影響，不是買賣建議。美股、VIX、匯率來自 Yahoo 的非官方資料，偶爾可能暫時抓不到。</p>';
+  return html;
+}
+function mountMarket() {
+  $$('[data-spark]').forEach(cv => {
+    const s = indSeries(cv.dataset.spark);
+    if (!s) return;
+    const v = s.v.slice(-30), c = cv.getContext('2d'), W = cv.width, H = cv.height;
+    const lo = Math.min(...v), hi = Math.max(...v), y = x => H - 2 - Math.round((x - lo) / ((hi - lo) || 1) * (H - 4));
+    c.fillStyle = css('--axis');
+    if (IND_META[cv.dataset.spark].flow) { c.fillRect(0, y(Math.max(lo, Math.min(hi, 0))), W, 1); }
+    let py = null;
+    v.forEach((val, i) => {
+      const x = Math.round(i / (v.length - 1) * (W - 1)), yy = y(val);
+      c.fillStyle = i === v.length - 1 ? css('--mint') : css('--t1');
+      if (py !== null) { const a = Math.min(py, yy), b = Math.max(py, yy); c.fillRect(x, a, 1, b - a + 1); } else c.fillRect(x, yy, 1, 1);
+      py = yy;
+    });
+  });
+  $$('[data-ind]').forEach(b => b.onclick = () => {
+    const id = b.dataset.ind, s = indSeries(id);
+    openSheet('<div class="sheet-h">' + mini({ face: 'happy', acc: 'glasses' }) + '<h3>' + IND_META[id].name + '</h3><button class="icon-btn" data-close aria-label="關閉">' + icon('x', 'inv') + '</button></div>' +
+      '<div class="big-num" style="font-size:44px;line-height:1;margin-bottom:10px">' + IND_META[id].fmt(s.v[s.v.length - 1]) + '</div><p class="sub" style="margin:0;line-height:1.75">' + indText(id, s) + '</p>');
+  });
+  $$('[data-more]').forEach(b => b.onclick = () => { const p = b.previousElementSibling; p.classList.toggle('clamp'); b.textContent = p.classList.contains('clamp') ? '展開全文' : '收起'; });
+}
+
+// ═════════ 預測模型 ═════════
+const SCEN = { low: { mu: 0.05, label: '保守', note: '年化 5%' }, mid: { mu: 0.08, label: '中性', note: '年化 8%' }, high: { mu: 0.11, label: '樂觀', note: '年化 11%' } };
+function rng(seed) {
+  return () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+/**
+ * 蒙地卡羅模擬：台股每天的漲跌用常態分布（年化報酬依情境、波動 20%），
+ * 正二每天 2 倍、主動型 ETF 與基金稍微放大並加上自己的波動；
+ * 每月底加入存款、年終，扣掉預計的大額支出。
+ */
+function simulate() {
+  const D = S.D, plan = S.data.plan || {}, mk = D.mk;
+  const key = JSON.stringify(plan) + (mk.ok ? mk.date : D.latest.date) + (mk.ok ? Math.round(mk.est) : D.latest.total);
+  if (S.sim && S.sim.key === key) return S.sim;
+  const start = mk.ok ? mk.date : D.latest.date;
+  const buckets = [];
+  S.data.accounts.forEach(a => {
+    if (a.status !== '使用中') return;
+    const h = mk.holdings.find(x => x.acc.id === a.id);
+    const v = h ? h.value : lastKnown(a.id, D.recs.length - 1).a;
+    if (!v) return;
+    const kind = !D.isInv(a.id) ? 'cash' : a.code === '00631L' ? 'lev' : a.type === '基金' ? 'fund' : /A$/.test(a.code || '') ? 'act' : 'mkt';
+    buckets.push({ v, kind, name: a.name });
+  });
+  const months = [];
+  let y = +start.slice(0, 4), m = +start.slice(5, 7);
+  while (y < 2027 || (y === 2027 && m <= 12)) { months.push(y + '-' + ('0' + m).slice(-2)); m++; if (m > 12) { m = 1; y++; } }
+  const N = 2000, mu = SCEN[plan.scenario || 'mid'].mu, sig = 0.2;
+  const dmu = Math.log(1 + mu) / 252, dsig = sig / Math.sqrt(252);
+  const rand = rng(20261029);
+  let spare = null;
+  const gauss = () => { if (spare !== null) { const g = spare; spare = null; return g; } let u = 0, v = 0; while (!u) u = rand(); v = rand(); const r = Math.sqrt(-2 * Math.log(u)), t = 2 * Math.PI * v; spare = r * Math.sin(t); return r * Math.cos(t); };
+  const firstDays = Math.max(1, Math.round((new Date(+start.slice(0, 4), +start.slice(5, 7), 0).getDate() - +start.slice(8, 10)) / 30 * 21));
+  const res = months.map(() => new Float64Array(N));
+  const idA = 0.10 / Math.sqrt(252), idF = 0.12 / Math.sqrt(252);
+  for (let p = 0; p < N; p++) {
+    const v = buckets.map(b => b.v);
+    let extra = 0;
+    months.forEach((mo, mi) => {
+      const nd = mi === 0 ? firstDays : 21;
+      for (let d = 0; d < nd; d++) {
+        const r = Math.exp(dmu + dsig * gauss()) - 1;
+        for (let b = 0; b < buckets.length; b++) {
+          const k = buckets[b].kind;
+          if (k === 'mkt') v[b] *= 1 + r;
+          else if (k === 'lev') v[b] *= 1 + 2 * r - 0.01 / 252;
+          else if (k === 'act') v[b] *= 1 + 1.05 * r + idA * gauss();
+          else if (k === 'fund') v[b] *= 1 + 1.1 * r + idF * gauss();
+        }
+      }
+      extra += plan.monthly || 0;
+      if (+mo.slice(5) === (plan.bonusMonth || 1) && mi > 0) extra += plan.bonus || 0;
+      (plan.expenses || []).forEach(e => { if (e.month === mo) extra -= e.amount; });
+      let tot = extra;
+      for (let b = 0; b < v.length; b++) tot += v[b];
+      res[mi][p] = tot;
+    });
+  }
+  const q = (arr, f) => arr[Math.min(arr.length - 1, Math.floor(f * arr.length))];
+  const pcts = res.map(a => { const s = Array.from(a).sort((x, z) => x - z); return { p10: q(s, .1), p20: q(s, .2), p25: q(s, .25), p30: q(s, .3), p50: q(s, .5), p60: q(s, .6), p75: q(s, .75), p90: q(s, .9), sorted: s }; });
+  const prob = (mi, goal) => mi < 0 ? null : pcts[mi].sorted.filter(x => x >= goal).length / N;
+  const i26 = months.indexOf('2026-12'), i27 = months.length - 1;
+  const now = buckets.reduce((t, b) => t + b.v, 0);
+  const cash = buckets.filter(b => b.kind === 'cash').reduce((t, b) => t + b.v, 0);
+  const shock = R => buckets.reduce((t, b) => t + b.v * (b.kind === 'cash' ? 0 : b.kind === 'lev' ? Math.pow(1 + R, 2) * 0.92 - 1 : b.kind === 'fund' ? 1.1 * R : b.kind === 'act' ? 1.05 * R : R), 0);
+  S.sim = { key, months, pcts, prob, i26, i27, now, cash, shock, scen: SCEN[plan.scenario || 'mid'], monthsLeft27: months.length };
+  return S.sim;
+}
+const floor10 = v => Math.floor(v / 100000) * 100000;
+function predictCard() {
+  if (!S.D.latest) return '';
+  const sim = simulate(), plan = S.data.plan || {}, g = S.data.goals['2026'], c = (S.data.challenges || {})['2026'];
+  const e26 = sim.i26 >= 0 ? sim.pcts[sim.i26] : null, e27 = sim.pcts[sim.i27];
+  const pg = g && sim.i26 >= 0 ? sim.prob(sim.i26, g.amount) : null, pc = c && sim.i26 >= 0 ? sim.prob(sim.i26, c.amount) : null;
+  const safe = floor10(e27.p30), dream = floor10(e27.p60);
+  const need = Math.max(0, (3000000 - e27.p20) / sim.monthsLeft27) + (plan.monthly || 0);
+  const say = pg != null ? '照「' + sim.scen.label + '」假設，2026 年底有 ' + pct(pg, 0) + ' 機率達到 ' + wan(g.amount) + '。' : '照「' + sim.scen.label + '」假設，2027 年底中間值約 ' + wan(e27.p50) + '。';
+  const s22 = sim.shock(-0.22), s08 = sim.shock(-0.46);
+  return '<section class="card span2"><div class="card-h">' + icon('target', null, '#E5484D') + '<h2>未來預測</h2>' + explainBtn('predict') + '<button class="btn small" id="plan-btn">調整假設</button></div>' +
+    '<div class="peek">' + mini({ face: 'happy', acc: 'glasses' }, 'bob') + '<div class="gw-say">' + esc(say) + '</div></div>' +
+    '<div class="stats">' +
+    (e26 ? '<div class="stat"><div class="k">2026 年底（中間值）</div><div class="v">' + wan(e26.p50) + '</div></div>' : '') +
+    (pg != null ? '<div class="stat"><div class="k">達到 ' + wan(g.amount) + ' 的機率</div><div class="v">' + pct(pg, 0) + '</div></div>' : '') +
+    (pc != null ? '<div class="stat"><div class="k">達到挑戰 ' + wan(c.amount) + '</div><div class="v">' + pct(pc, 0) + '</div></div>' : '') +
+    '<div class="stat"><div class="k">2027 年底（中間值）</div><div class="v">' + wan(e27.p50) + '</div></div></div>' +
+    '<div class="chart tall" style="margin-top:14px"><canvas id="c-fan"></canvas></div>' +
+    legendHtml([['中間值', css('--t1')], ['一半的情況落在這裡', alpha(css('--t1'), .35)], ['八成的情況落在這裡', alpha(css('--t1'), .15)]].concat(g ? [['2026 目標', '#FFC94A']] : [])) +
+    '<ul class="gw-log" style="margin-top:14px">' +
+    '<li><i style="background:#3CCBAA"></i><span>2027 目標建議：穩健 <b>' + wan(safe) + '</b>（約 7 成把握）、挑戰 <b>' + wan(dream) + '</b>（約 4 成把握）</span></li>' +
+    '<li><i style="background:#FFC94A"></i><span>' + (e27.p20 >= 3000000 ? '照現在的存法，2027 年底到 300 萬已有 8 成把握' : '想要有 8 成把握在 2027 年底到 300 萬，每月大約要存 <b>' + wan(need) + '</b>（現在設定 ' + wan(plan.monthly || 0) + '）') + '</span></li>' +
+    '<li><i style="background:#E5484D"></i><span>如果遇到像 2022 年那樣台股跌 22%，資產大約少 <b>' + wan(-s22) + '</b>；像 2008 年跌 46%，大約少 <b>' + wan(-s08) + '</b>（正二會跌得更兇）</span></li>' +
+    '<li><i style="background:#8B7CF6"></i><span>大跌時可以加碼的錢（活存＋現金）：<b>' + wan(sim.cash) + '</b>，約占總資產 ' + pct(sim.cash / sim.now, 0) + '</span></li></ul>' +
+    '<p class="muted" style="font-size:12px;margin:12px 0 0">用台股長期的統計特性模擬 2,000 種可能的走法（' + sim.scen.label + '：' + sim.scen.note + '，波動 20%）。這是可能的範圍，不是預言，也不是投資建議。</p></section>';
+}
+function mountPredict() {
+  const cv = $('#c-fan');
+  if (!cv) return;
+  const sim = S.sim, xs = sim.months.map(mo => Date.UTC(+mo.slice(0, 4), +mo.slice(5, 7), 0));
+  const col = css('--t1'), g = S.data.goals['2026'];
+  const ds = (key, extra) => Object.assign({ data: sim.pcts.map((p, i) => ({ x: xs[i], y: p[key] })), borderWidth: 0, pointRadius: 0, tension: 0 }, extra);
+  const sets = [
+    ds('p10', { label: 'P10', fill: false }),
+    ds('p90', { label: '八成範圍', fill: '-1', backgroundColor: alpha(col, .15) }),
+    ds('p25', { label: 'P25', fill: false }),
+    ds('p75', { label: '一半範圍', fill: '-1', backgroundColor: alpha(col, .3) }),
+    ds('p50', { label: '中間值', borderColor: col, borderWidth: 3, pointStyle: 'rect', pointRadius: 0, pointHoverRadius: 5 }),
+  ];
+  if (g && sim.i26 >= 0) sets.push({ label: '2026 目標', data: [{ x: xs[0], y: g.amount }, { x: xs[sim.i26], y: g.amount }], borderColor: '#FFC94A', borderWidth: 2, pointRadius: 0, tension: 0 });
+  S.charts.push(new Chart(cv, {
+    type: 'line', plugins: [crosshair], data: { datasets: sets },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false }, tooltip: Object.assign(tooltipBase(), {
+        filter: it => ['P10', 'P25'].indexOf(it.dataset.label) < 0,
+        callbacks: { title: it => { const d = new Date(it[0].parsed.x); return d.getUTCFullYear() + '/' + (d.getUTCMonth() + 1) + ' 月底'; }, label: c => ' ' + c.dataset.label + '  ' + wan(c.parsed.y) } }) },
+      scales: axes(false, [{ points: xs.map(x => ({ x })) }]),
+    },
+  }));
+  $('#plan-btn').onclick = planForm;
+}
+function planForm() {
+  const p = S.data.plan || {}, ex = (p.expenses || []).concat([{ name: '', amount: '', month: '' }, { name: '', amount: '', month: '' }]).slice(0, 3);
+  openSheet('<div class="sheet-h">' + mini({ face: 'idle', acc: 'wrench' }) + '<h3>調整預測假設</h3><button class="icon-btn" data-close aria-label="關閉">' + icon('x', 'inv') + '</button></div>' +
+    '<label class="field"><span>每月大約存多少</span><input class="input num" id="pl-m" inputmode="decimal" value="' + nf.format(p.monthly || 0) + '"></label>' +
+    '<div style="display:grid;grid-template-columns:1fr 110px;gap:10px"><label class="field"><span>年終獎金</span><input class="input num" id="pl-b" inputmode="decimal" value="' + nf.format(p.bonus || 0) + '"></label>' +
+    '<label class="field"><span>發放月份</span><select class="input" id="pl-bm">' + Array.from({ length: 12 }, (_, i) => '<option value="' + (i + 1) + '"' + ((p.bonusMonth || 1) === i + 1 ? ' selected' : '') + '>' + (i + 1) + ' 月</option>').join('') + '</select></label></div>' +
+    '<div class="group-h">預計的大額支出</div>' +
+    ex.map((e, i) => '<div class="ex-row"><input class="input" data-exn="' + i + '" placeholder="名稱，例如出國" value="' + esc(e.name || '') + '"><input class="input num" data-exa="' + i + '" inputmode="decimal" placeholder="金額" value="' + (e.amount ? nf.format(e.amount) : '') + '"><input class="input" type="month" data-exm="' + i + '" value="' + esc(e.month || '') + '"></div>').join('') +
+    '<div class="switch-row" style="margin-top:8px"><span>市場假設</span><div class="seg" id="pl-s">' + Object.keys(SCEN).map(k => '<button data-v="' + k + '" class="' + ((p.scenario || 'mid') === k ? 'on' : '') + '">' + SCEN[k].label + '</button>').join('') + '</div></div>' +
+    '<p class="muted" style="font-size:12px;margin:4px 0 16px">保守＝台股年化 5%、中性＝8%、樂觀＝11%。台股過去二十年大約落在中性附近，但每年差很多。</p>' +
+    '<button class="btn primary" id="pl-save">儲存並重新計算</button>');
+  let scen = p.scenario || 'mid';
+  $$('#pl-s button').forEach(b => b.onclick = () => { scen = b.dataset.v; $$('#pl-s button').forEach(x => x.classList.toggle('on', x === b)); });
+  $('#pl-save').onclick = async () => {
+    const expenses = [0, 1, 2].map(i => ({ name: $('[data-exn="' + i + '"]').value.trim(), amount: evalExpr($('[data-exa="' + i + '"]').value) || 0, month: $('[data-exm="' + i + '"]').value })).filter(e => e.name && e.amount && e.month);
+    const ok = await call('savePlan', [{ monthly: evalExpr($('#pl-m').value) || 0, bonus: evalExpr($('#pl-b').value) || 0, bonusMonth: +$('#pl-bm').value, expenses, scenario: scen }], '假設已更新，重新計算完成');
+    if (ok) closeSheet();
+  };
+}
+
+// ═════════ 紀錄 ═════════
+function recordsView() {
+  const recs = S.D.recs.slice().reverse();
+  if (!recs.length) return '<div class="card empty">還沒有任何紀錄</div>';
+  const years = {};
+  recs.forEach(r => { (years[r.date.slice(0, 4)] = years[r.date.slice(0, 4)] || []).push(r); });
+  let html = '';
+  Object.keys(years).sort().reverse().forEach(y => {
+    const list = years[y];
+    const first = list[list.length - 1];
+    const base = first.prev || first;
+    const ch = list[0].total - base.total;
+    html += '<div class="year-h px-corner"><b>' + y + '</b>' + mini(ch > 0 ? { face: 'happy', acc: 'hat' } : { face: 'worry', acc: 'sweat' }, 'sm') + '<span class="pill ' + dir(ch) + '">' + arrow(ch) + ' ' + signed(ch) + ' <span class="sep">· ' + list.length + ' 次</span></span></div><div class="card" style="padding:6px 12px">';
+    html += list.map(r => {
+      const wd = WEEK[new Date(ts(r.date)).getUTCDay()];
+      const flag = S.flagsList.find(f => f.date === r.date);
+      return '<button class="row" data-rec="' + r.id + '"><div class="date-badge"><span class="m">' + +r.date.slice(5, 7) + '月</span><b>' + +r.date.slice(8) + '</b><span>週' + wd + '</span></div>' +
+        '<div class="main"><div class="t rec-total">' + money(r.total) + (flag ? ' <img class="pi" alt="" title="' + esc(flag.label) + '" src="' + pxIcon('flag', css('--text'), '#FFC94A') + '">' : '') + '</div><div class="s">' + (r.note ? esc(r.note.split('\n')[0]) : '<span class="muted">沒有備註</span>') + '</div></div>' +
+        '<div class="r"><div class="num ' + dir(r.delta) + '" style="font-weight:600;font-size:14px">' + (r.delta == null ? '' : signed(r.delta)) + '</div>' +
+        (r.profitShown != null ? '<div class="s">獲利 ' + wan(r.profitShown) + '</div>' : '') + '</div></button>';
+    }).join('');
+    html += '</div>';
+  });
+  return html;
+}
+function mountRecords() { $$('[data-rec]').forEach(b => b.onclick = () => openRecord(b.dataset.rec)); }
+
+function openRecord(id) {
+  const D = S.D;
+  const idx = D.recs.findIndex(r => r.id === id);
+  const r = D.recs[idx];
+  if (!r) return;
+  let rows = '';
+  S.data.accounts.forEach(a => {
+    const e = r.entries[a.id];
+    if (!e) return;
+    const p = r.prev && r.prev.entries[a.id];
+    const d = p ? e.a - p.a : null;
+    const ret = e.c != null && e.c > 0 ? (e.a - e.c) / e.c : null;
+    rows += '<tr><td><span class="td-acc">' + typeIcon(a.type) + esc(a.name) + '</span></td><td class="num">' + money(e.a) + '</td>' +
+      '<td class="num ' + dir(d) + '">' + (d == null ? '—' : signed(d)) + '</td>' + (r.cost != null ? '<td class="num ' + dir(ret) + '">' + (ret == null ? '' : pct(ret)) + '</td>' : '') + '</tr>';
+  });
+  openSheet('<div class="sheet-h"><h3>' + fmtD(r.date) + '</h3><button class="icon-btn" data-close aria-label="關閉">' + icon('x', 'inv') + '</button></div>' +
+    '<div class="big-num" style="font-size:48px;line-height:1">' + money(r.total) + '</div><div style="margin:6px 0 16px">' + deltaPill(r.delta, r.prev && r.prev.total, r.prev ? '較 ' + shortD(r.prev.date) : '') + '</div>' +
+    (r.note ? '<div class="note-box" style="white-space:pre-wrap;margin:0 0 16px">' + esc(r.note) + '</div>' : '') +
+    '<div class="stats" style="margin-bottom:16px">' +
+    '<div class="stat"><div class="k">投資市值</div><div class="v num">' + money(r.inv) + '</div></div>' +
+    '<div class="stat"><div class="k">' + (r.auto != null ? '未實現損益' : '獲利總額（手填）') + '</div><div class="v num ' + dir(r.profitShown) + '">' + (r.profitShown == null ? '—' : (r.auto != null ? signed(r.auto) : money(r.profit))) + '</div></div></div>' +
+    '<div class="table-wrap"><table><thead><tr><th>帳戶</th><th>金額</th><th>變動</th>' + (r.cost != null ? '<th>報酬率</th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    (D.multiUser && r.by ? '<p class="muted" style="font-size:13px">記錄者：' + esc(r.by) + '</p>' : '') +
+    '<div class="btn-row" style="margin-top:18px"><button class="btn" data-edit>' + icon('edit') + '編輯</button><button class="btn danger" data-del>' + icon('trash') + '刪除</button></div>');
+  $('[data-edit]', $('#sheet')).onclick = () => go('entry', { edit: r.id });
+  $('[data-del]', $('#sheet')).onclick = async () => {
+    if (await confirmBox('確定要刪除 ' + fmtD(r.date) + ' 這筆紀錄嗎？刪除後無法復原。', '刪除')) {
+      if (await call('deleteRecord', [r.id], '已刪除')) closeSheet();
+    }
+  };
+}
+
+function openAccount(id) {
+  const D = S.D, a = D.acc[id];
+  const pts = [], costs = [];
+  D.recs.forEach(r => {
+    const e = r.entries[id];
+    if (!e) return;
+    pts.push({ x: ts(r.date), y: e.a });
+    if (e.c != null) costs.push({ x: ts(r.date), y: e.c });
+  });
+  const lk = lastKnown(id, D.recs.length - 1);
+  const ret = lk.c ? (lk.a - lk.c) / lk.c : null;
+  const first = pts[0];
+  openSheet('<div class="sheet-h">' + typeIcon(a.type) + '<h3>' + esc(a.name) + '</h3><span class="tag">' + a.type + '</span>' + (a.status === '已結清' ? '<span class="tag">已結清</span>' : '') + '<button class="icon-btn" data-close aria-label="關閉">' + icon('x', 'inv') + '</button></div>' +
+    '<div class="stats" style="margin-bottom:14px"><div class="stat"><div class="k">目前金額</div><div class="v num">' + money(lk.a) + '</div></div>' +
+    (D.isInv(id) ? '<div class="stat"><div class="k">報酬率</div><div class="v num ' + dir(ret) + '">' + (ret == null ? '<span class="muted" style="font-size:14px">尚未填成本</span>' : pct(ret)) + '</div></div>' :
+      '<div class="stat"><div class="k">自 ' + (first ? tsLabel(first.x) : '') + ' 起</div><div class="v num ' + dir(lk.a - (first ? first.y : 0)) + '">' + signed(lk.a - (first ? first.y : 0)) + '</div></div>') + '</div>' +
+    '<div class="chart"><canvas id="c-acc"></canvas></div>' + (costs.length ? legendHtml([['金額', css('--t1')], ['投入成本', css('--t2')]]) : ''));
+  const series = [{ label: '金額', color: css('--t1'), points: pts, fill: !costs.length }];
+  if (costs.length) series.push({ label: '投入成本', color: css('--t2'), points: costs });
+  sheetChart = lineChart($('#c-acc'), series);
+}
+
+// ═════════ 記一筆 ═════════
+function entryView() {
+  const D = S.D;
+  const editing = S.edit ? D.recs.find(r => r.id === S.edit) : null;
+  const idx = editing ? D.recs.indexOf(editing) : D.recs.length;
+  const prevIdx = idx - 1;
+  const date = editing ? editing.date : S.data.today;
+  const estNote = {};
+  const since = D.latest && !editing ? days(D.latest.date, S.data.today) : null;
+  let html = '<div class="card"><div class="peek"><img class="mini bob" id="peek-img" alt=""><div class="gw-say" id="peek-say">' +
+    (editing ? '要改哪裡呢？' : since != null ? '距離上次記帳 ' + since + ' 天，改有變動的就好' : '記下第一筆吧！') + '</div></div><label class="field"><span>日期</span><input type="date" class="input" id="f-date" value="' + date + '"></label>';
+  S.data.types.forEach(t => {
+    const list = S.data.accounts.filter(a => a.type === t && (a.status === '使用中' || S.showClosed || (editing && editing.entries[a.id])));
+    if (!list.length) return;
+    html += '<div class="fgroup"><div class="group-h">' + typeIcon(t) + t + '</div>';
+    list.forEach(a => {
+      const lk = prevIdx >= 0 ? lastKnown(a.id, prevIdx) : { a: null, c: null };
+      let val, cost;
+      if (editing) {
+        const e = editing.entries[a.id];
+        val = e ? e.a : '';
+        cost = e && e.c != null ? e.c : '';
+      } else {
+        val = a.status === '使用中' && lk.a != null ? lk.a : '';
+        cost = lk.c != null ? lk.c : '';
+        const h = D.mk.holdings.find(x => x.acc.id === a.id);
+        if (h && h.last.d > h.recDate) { val = Math.round(h.value); estNote[a.id] = '已帶入 ' + shortD(h.last.d) + ' 收盤估算'; }
+      }
+      const inv = D.isInv(a.id);
+      html += '<div class="frow' + (a.status === '已結清' ? ' closed' : '') + '" data-id="' + a.id + '" data-last="' + (lk.a == null ? '' : lk.a) + '">' +
+        '<div><div class="name">' + esc(a.name) + (a.status === '已結清' ? '<span class="tag">已結清</span>' : '') + '</div><div class="last num">上次 ' + (lk.a == null ? '—' : money(lk.a)) + (estNote[a.id] ? '<br>' + estNote[a.id] : '') + '</div></div>' +
+        '<input class="input num amt" inputmode="decimal" autocomplete="off" placeholder="不記錄" value="' + (val === '' ? '' : nf.format(val)) + '">' +
+        (inv ? '<div class="cost-l">投入成本</div><input class="input num cost" inputmode="decimal" autocomplete="off" placeholder="選填" value="' + (cost === '' ? '' : nf.format(cost)) + '">' : '') +
+        '<div class="diff num"></div></div>';
+    });
+    html += '</div>';
+  });
+  const closedCount = S.data.accounts.filter(a => a.status === '已結清').length;
+  if (closedCount && !S.showClosed) html += '<div style="padding:12px 0 2px"><button class="link" id="show-closed">顯示 ' + closedCount + ' 個已結清帳戶</button></div>';
+  html += '<label class="field" style="margin-top:14px"><span>備註</span><textarea class="input" id="f-note" placeholder="這次有什麼事想記下來？">' + esc(editing ? editing.note : '') + '</textarea></label>' +
+    '<p class="muted" style="font-size:12px;margin:0">金額欄可以輸入算式，例如 2782+1500。留空代表這次不記錄該帳戶。</p></div>';
+  html += '<div class="savebar"><div class="tot"><span class="muted">新的總資產</span><b class="num" id="f-total">—</b><span id="f-delta"></span></div>' +
+    (editing ? '<button class="btn" id="f-cancel">取消</button>' : '') + '<button class="btn primary" id="f-save">儲存</button></div>';
+  return html;
+}
+function mountEntry() {
+  const D = S.D;
+  const editing = S.edit ? D.recs.find(r => r.id === S.edit) : null;
+  const prevTotal = editing ? (editing.prev ? editing.prev.total : null) : (D.latest ? D.latest.total : null);
+  $('#peek-img').src = GUGU.miniURL({ face: 'happy', acc: 'coin', body: S.pet.body });
+  let first = true;
+  function update() {
+    let total = 0, bad = false;
+    $$('.frow').forEach(row => {
+      const inp = $('.amt', row);
+      const v = evalExpr(inp.value);
+      inp.classList.toggle('err', v !== null && isNaN(v));
+      const c = $('.cost', row);
+      if (c) c.classList.toggle('err', evalExpr(c.value) !== null && isNaN(evalExpr(c.value)));
+      if (v !== null && isNaN(v)) bad = true;
+      if (v) total += v;
+      const last = row.dataset.last === '' ? null : Number(row.dataset.last);
+      const d = v != null && !isNaN(v) && last != null ? v - last : null;
+      const el = $('.diff', row);
+      el.className = 'diff num ' + (d ? dir(d) : '');
+      el.textContent = d ? signed(d) : '';
+    });
+    $('#f-total').textContent = bad ? '有欄位格式不對' : money(total);
+    if (!first) {
+      const d = total - (prevTotal || 0);
+      const [face, acc, msg] = bad ? ['worry', 'question', '這格好像怪怪的？'] : prevTotal == null ? ['happy', 'coin', '第一筆！'] :
+        d > 0 ? ['happy', 'coin', '比上次多 ' + wan(d) + '！'] : d < 0 ? ['worry', 'sweat', '比上次少 ' + wan(-d) + '…沒關係'] : ['idle', null, '跟上次一樣'];
+      $('#peek-say').textContent = msg;
+      $('#peek-img').src = GUGU.miniURL({ face, acc, body: S.pet.body });
+    }
+    first = false;
+    $('#f-delta').innerHTML = !bad && prevTotal != null ? '<span class="' + dir(total - prevTotal) + '">' + arrow(total - prevTotal) + ' ' + signed(total - prevTotal) + '</span> <span class="muted">較上次</span>' : '';
+    return !bad;
+  }
+  $$('.frow input').forEach(inp => {
+    inp.addEventListener('input', update);
+    inp.addEventListener('focus', () => { inp.value = inp.value.replace(/,/g, ''); setTimeout(() => inp.select(), 0); });
+    inp.addEventListener('blur', () => { const v = evalExpr(inp.value); if (v !== null && !isNaN(v)) inp.value = nf.format(v); update(); });
+  });
+  update();
+  const sc = $('#show-closed');
+  if (sc) sc.onclick = () => { S.showClosed = true; const keep = collect(); render(); restore(keep); };
+  const cancel = $('#f-cancel');
+  if (cancel) cancel.onclick = () => go('records');
+  $('#f-save').onclick = async () => {
+    if (!update()) { toast('有欄位格式不對，請檢查紅框'); return; }
+    const entries = [];
+    $$('.frow').forEach(row => {
+      const a = evalExpr($('.amt', row).value);
+      if (a === null) return;
+      const c = $('.cost', row) ? evalExpr($('.cost', row).value) : null;
+      entries.push({ id: row.dataset.id, a: a, c: c });
+    });
+    if (!entries.length) { toast('至少要填一個帳戶'); return; }
+    const date = $('#f-date').value;
+    if (!date) { toast('請選擇日期'); return; }
+    const ok = await call('saveRecord', [{ id: editing ? editing.id : null, date: date, note: $('#f-note').value.trim(), entries: entries }], editing ? '已更新' : '已儲存 ✓');
+    if (ok) { S.pendingEat = true; go(editing ? 'records' : 'home'); }
+  };
+  function collect() {
+    const m = {};
+    $$('.frow').forEach(row => { m[row.dataset.id] = [$('.amt', row).value, $('.cost', row) ? $('.cost', row).value : null]; });
+    return { m, date: $('#f-date').value, note: $('#f-note').value };
+  }
+  function restore(k) {
+    $$('.frow').forEach(row => { const v = k.m[row.dataset.id]; if (!v) return; $('.amt', row).value = v[0]; if (v[1] != null && $('.cost', row)) $('.cost', row).value = v[1]; });
+    $('#f-date').value = k.date; $('#f-note').value = k.note;
+    $$('.frow input').forEach(i => i.dispatchEvent(new Event('input')));
+  }
+}
+
+// ═════════ 分析 ═════════
+const EXPLAIN = {"predict": ["未來預測", "用電腦模擬兩千種股市可能的走法，把你現在的持股、每月存款、年終和預計的大額支出都算進去，看年底資產大概會落在哪裡。深色的線是中間值；顏色越淺的區塊代表越少見、但仍有可能的情況。正二是兩倍槓桿，漲的時候漲比較多，跌的時候也跌比較兇，模擬裡都有算進去。這不是預言，是幫你看「穩健的目標」大概在哪裡。"], "stack": ["資產結構變化", "把你的錢分成銀行存款、股票ETF、基金、現金、外幣，疊在一起看。看每種顏色的厚度怎麼變，就知道錢慢慢從哪裡移到哪裡。例如存款那層變薄、股票那層變厚，代表你把更多錢放進了投資。"], "delta": ["每次記帳的增減", "每一根柱子是「這次記帳比上次多了或少了多少」。往上是增加、往下是減少，顏色照你設定的漲跌色。柱子特別長的那幾次，通常是發薪、大筆花費，或股市大漲大跌。"], "profit": ["投資獲利走勢", "你的投資總共幫你賺了多少錢。前半段是你以前手寫在備註裡的「獲利總額」；之後只要記帳時填上投入成本，就會改由 App 自動計算。線往上走，代表投資在幫你賺錢。"], "source": ["資產增加從哪來", "把每年資產增加的錢拆成兩塊：「投資賺的」是股價、淨值上漲多出來的錢；「自己存的」是扣掉市場漲跌之後剩下的部分，也就是薪水存下來、再扣掉花費的結果。兩塊都是正的，代表你又會存又會投資。"], "invest": ["投資明細", "每一檔投資現在值多少、你總共投入多少錢（投入成本）、賺賠多少，以及報酬率。報酬率 50% 的意思是：每投入 100 元，現在值 150 元。"], "year": ["年度總結", "每一年從年初到年底（今年就到最新一筆）資產增加了多少，以及當年的目標達成了幾成。"]};
+const explainBtn = k => '<button class="explain" data-explain="' + k + '" aria-label="股娃娃解釋這張圖"><img alt="" src="' + GUGU.miniURL({ face: 'idle', acc: 'glasses' }) + '"></button>';
+function openExplain(k) {
+  const [title, text] = EXPLAIN[k];
+  openSheet('<div class="sheet-h">' + mini({ face: 'happy', acc: 'glasses' }) + '<h3>' + title + '</h3><button class="icon-btn" data-close aria-label="關閉">' + icon('x', 'inv') + '</button></div><p class="sub" style="margin:0 0 6px;line-height:1.75">' + text + '</p>');
+}
+function analysisView() {
+  const D = S.D;
+  if (!D.recs.length) return '<div class="card empty">還沒有任何紀錄</div>';
+  const rr = inRange(D.recs);
+  const types = S.data.types.filter(t => rr.some(r => r.byType[t] > 0));
+  return '<div class="grid" style="margin-bottom:22px">' + predictCard() + '</div><div style="margin-bottom:14px">' + rangeSeg() + '</div><div class="grid">' +
+    '<section class="card span2"><div class="card-h">' + icon('chart') + '<h2>資產結構變化</h2>' + explainBtn('stack') + '</div><div class="chart tall"><canvas id="c-stack"></canvas></div>' + legendHtml(types.map(t => [t, D.typeColor[t]])) + '</section>' +
+    '<section class="card"><div class="card-h">' + icon('calendar', null, '#E5484D') + '<h2>每次記帳的增減</h2>' + explainBtn('delta') + '</div><div class="chart"><canvas id="c-delta"></canvas></div></section>' +
+    '<section class="card"><div class="card-h">' + icon('coin', null, '#FFC94A') + '<h2>投資獲利走勢</h2>' + explainBtn('profit') + '</div><div class="chart"><canvas id="c-profit"></canvas></div></section>' +
+    sourceCard() + investTable() + yearTable() + '</div>';
+}
+/** 每段記帳區間：投資賺的 = 期初持有單位 × 價格變化；其餘就是自己存下（或花掉）的錢 */
+function sourceByYear() {
+  const out = {};
+  S.D.saved.forEach(iv => {
+    const y = iv.date.slice(0, 4);
+    const o = out[y] || (out[y] = { year: y, delta: 0, market: 0, from: iv.from, to: iv.date });
+    o.delta += iv.delta; o.market += iv.market; o.to = iv.date;
+  });
+  return Object.keys(out).sort().reverse().map(y => Object.assign(out[y], { saved: out[y].delta - out[y].market }));
+}
+function sourceCard() {
+  const list = sourceByYear();
+  if (!list.length) return '';
+  const max = Math.max(...list.map(o => Math.max(Math.abs(o.market), Math.abs(o.saved))), 1);
+  const bar = (v, color) => '<div class="cbar"><i style="background:' + color + ';width:' + (Math.abs(v) / max * 50) + '%;' + (v >= 0 ? 'left:50%' : 'right:50%') + '"></i></div>';
+  const body = list.map(o => {
+    const share = o.delta > 0 && o.market > 0 && o.saved > 0 ? '，其中 ' + pct(o.market / o.delta, 0) + ' 是投資賺的' : '';
+    return '<div class="src-year"><div class="src-top"><b>' + o.year + '</b><span class="num ' + dir(o.delta) + '" style="font-weight:650">' + signed(o.delta) + '</span></div>' +
+      '<p class="src-sum">' + fmtD(o.from) + ' → ' + fmtD(o.to) + ' 資產' + (o.delta >= 0 ? '增加 ' : '減少 ') + wan(Math.abs(o.delta)) + share + '。</p>' +
+      '<div class="src-row"><span>投資賺的</span>' + bar(o.market, 'var(--t3)') + '<span class="amt num">' + signed(o.market) + '</span></div>' +
+      '<div class="src-row"><span>' + (o.saved >= 0 ? '自己存的' : '花掉的') + '</span>' + bar(o.saved, 'var(--t1)') + '<span class="amt num">' + signed(o.saved) + '</span></div></div>';
+  }).join('');
+  return '<section class="card span2"><div class="card-h">' + icon('fund') + '<h2>資產增加從哪來</h2>' + explainBtn('source') + '</div>' + body +
+    '<p class="muted" style="font-size:12px;margin:14px 0 0">「自己存的」是資產變化扣掉市場漲跌後剩下的部分，包含薪水、紅包，也扣掉了花費。富達全球主題機會基金以美元淨值推算，會有一點匯率誤差。</p></section>';
+}
+function investTable() {
+  const D = S.D, idx = D.recs.length - 1;
+  const rows = S.data.accounts.filter(a => D.isInv(a.id) && a.status === '使用中').map(a => {
+    const lk = lastKnown(a.id, idx);
+    const p = lk.c != null ? lk.a - lk.c : null;
+    return '<tr><td>' + esc(a.name) + '</td><td class="num">' + money(lk.a) + '</td><td class="num">' + money(lk.c) + '</td><td class="num ' + dir(p) + '">' + (p == null ? '—' : signed(p)) + '</td><td class="num ' + dir(p) + '">' + (p == null || !lk.c ? '—' : pct(p / lk.c)) + '</td></tr>';
+  }).join('');
+  return '<section class="card span2"><div class="card-h">' + icon('stock') + '<h2>投資明細</h2>' + explainBtn('invest') + '</div><div class="table-wrap"><table><thead><tr><th>帳戶</th><th>市值</th><th>投入成本</th><th>損益</th><th>報酬率</th></tr></thead><tbody>' + rows + '</tbody></table></div></section>';
+}
+function yearTable() {
+  const D = S.D, years = {};
+  D.recs.forEach(r => { (years[r.date.slice(0, 4)] = years[r.date.slice(0, 4)] || []).push(r); });
+  const rows = Object.keys(years).sort().reverse().map(y => {
+    const list = years[y], first = list[0], last = list[list.length - 1];
+    const start = first.prev || first;
+    const g = S.data.goals[y];
+    return '<tr><td><b>' + y + '</b></td><td class="num">' + money(start.total) + '</td><td class="num">' + money(last.total) + '</td><td class="num ' + dir(last.total - start.total) + '">' + signed(last.total - start.total) + '</td><td class="num">' + (g ? wan(g.amount) : '—') + '</td><td class="num">' + (g ? pct(last.total / g.amount, 0) : '—') + '</td></tr>';
+  }).join('');
+  return '<section class="card span2"><div class="card-h">' + icon('calendar', null, '#E5484D') + '<h2>年度總結</h2>' + explainBtn('year') + '</div><div class="table-wrap"><table><thead><tr><th>年份</th><th>年初</th><th>最新／年底</th><th>增加</th><th>目標</th><th>達成</th></tr></thead><tbody>' + rows + '</tbody></table></div></section>';
+}
+function mountAnalysis() {
+  if (!S.D.recs.length) return;
+  $$('[data-explain]').forEach(b => b.onclick = () => openExplain(b.dataset.explain));
+  mountPredict();
+  bindRange();
+  const D = S.D, rr = inRange(D.recs);
+  const types = S.data.types.filter(t => rr.some(r => r.byType[t] > 0));
+  S.charts.push(lineChart($('#c-stack'), types.map(t => ({ label: t, color: css('--t' + (S.data.types.indexOf(t) + 1)), points: rr.map(r => ({ x: ts(r.date), y: r.byType[t] || 0 })) })), { stacked: true }));
+
+  const dr = rr.filter(r => r.delta != null);
+  S.charts.push(new Chart($('#c-delta'), {
+    type: 'bar',
+    data: { labels: dr.map(r => r.date), datasets: [{ label: '增減', data: dr.map(r => r.delta), backgroundColor: dr.map(r => r.delta >= 0 ? css('--up') : css('--down')), borderRadius: 0, maxBarThickness: 10 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 350 },
+      plugins: { legend: { display: false }, tooltip: Object.assign(tooltipBase(), { callbacks: { title: it => fmtD(it[0].label), label: c => ' 較上次  ' + signed(c.parsed.y) } }) },
+      scales: {
+        x: { grid: { display: false }, border: { color: css('--axis'), width: 2 }, ticks: { color: css('--muted'), font: PX_FONT, maxTicksLimit: 6, maxRotation: 0, callback(v) { const s = this.getLabelForValue(v); return s.slice(2, 4) + '/' + +s.slice(5, 7); } } },
+        y: { grid: { color: css('--grid') }, border: { display: false }, ticks: { color: css('--muted'), font: PX_FONT, maxTicksLimit: 5, callback: v => wan(v) } },
+      },
+    },
+  }));
+
+  const pr = rr.filter(r => r.profitShown != null);
+  if (pr.length) {
+    S.charts.push(lineChart($('#c-profit'), [{ label: '獲利', color: css('--t3'), points: pr.map(r => ({ x: ts(r.date), y: r.profitShown })), fill: true }]));
+  } else {
+    $('#c-profit').parentNode.innerHTML = '<div class="empty">這個區間沒有獲利資料</div>';
+  }
+}
+
+// ═════════ 設定 ═════════
+function settingsView() {
+  const D = S.D;
+  const accRows = S.data.accounts.map((a, i) =>
+    '<div class="row">' + typeIcon(a.type) + '<div class="main"><div class="t">' + esc(a.name) + '</div><div class="s">' + a.type + (a.code ? '，代號 ' + esc(a.code) : '') + (a.status === '已結清' ? '，已結清' : '') + '</div></div>' +
+    '<button class="icon-btn" data-mv="' + i + ',-1" ' + (i === 0 ? 'disabled style="opacity:.3"' : '') + '>' + icon('upArrow') + '</button>' +
+    '<button class="icon-btn" data-mv="' + i + ',1" ' + (i === S.data.accounts.length - 1 ? 'disabled style="opacity:.3"' : '') + '>' + icon('downArrow') + '</button>' +
+    '<button class="icon-btn" data-edit-acc="' + a.id + '">' + icon('edit') + '</button></div>').join('');
+  const g = goalInfo();
+  const hist = S.data.goalHistory.slice().reverse().map(h => '<div class="row"><div class="main"><div class="t">' + h.year + ' · ' + esc(h.name) + '</div><div class="s">' + esc(h.at) + ' 設定</div></div><div class="r num">' + money(h.amount) + '</div></div>').join('');
+  return '<div class="grid">' +
+    '<section class="card"><div class="card-h">' + icon('bank') + '<h2>帳戶</h2><button class="btn small primary" id="add-acc">' + icon('plus', 'inv') + '新增</button></div><div class="list">' + accRows + '</div></section>' +
+    '<div style="display:grid;gap:14px;align-content:start">' +
+    '<section class="card"><div class="card-h"><h2>' + GUGU.NAME + '</h2></div><div class="gw-status-h">' + mini({ face: 'happy' }, 'bob') + '<div><b style="font-size:17px">家園 Lv.' + S.pet.level + '：' + S.pet.levelName + '</b><span>紀念旗 ' + S.flagsList.length + ' 面</span></div></div>' +
+    '<div class="switch-row"><span>安靜模式<br><small class="muted">不主動說話、不自動演出，點牠才會動</small></span><div class="seg" id="s-quiet"><button data-v="0" class="' + (!S.quiet ? 'on' : '') + '">活潑</button><button data-v="1" class="' + (S.quiet ? 'on' : '') + '">安靜</button></div></div>' +
+    '<button class="btn small" id="gw-status-btn" style="margin-top:8px">看狀態與紀念冊</button></section>' +
+    '<section class="card"><div class="card-h">' + icon('target', null, '#E5484D') + '<h2>年度目標</h2></div>' +
+    '<label class="field"><span>年份</span><input class="input num" id="g-year" inputmode="numeric" value="' + g.year + '"></label>' +
+    '<label class="field"><span>目標金額</span><input class="input num" id="g-amt" inputmode="decimal" value="' + (g.goal ? nf.format(g.goal.amount) : '') + '"></label>' +
+    '<label class="field"><span>名稱</span><input class="input" id="g-name" value="' + esc(g.goal ? g.goal.name : '年度目標') + '"></label>' +
+    '<label class="field"><span>挑戰目標（選填）</span><input class="input num" id="g-ch" inputmode="decimal" placeholder="比年度目標更高一點的數字" value="' + (g.challenge ? nf.format(g.challenge.amount) : '') + '"></label>' +
+    '<button class="btn primary" id="g-save">儲存目標</button>' +
+    (hist ? '<div class="group-h" style="margin-top:12px">修改紀錄</div><div class="list">' + hist + '</div>' : '') + '</section>' +
+    '<section class="card"><div class="card-h">' + icon('eye') + '<h2>顯示</h2></div>' +
+    '<div class="switch-row"><span>漲跌顏色</span><div class="seg" id="s-updown"><button data-v="red" class="' + (S.updown === 'red' ? 'on' : '') + '">紅漲綠跌</button><button data-v="green" class="' + (S.updown === 'green' ? 'on' : '') + '">綠漲紅跌</button></div></div>' +
+    '<div class="switch-row"><span>外觀</span><div class="seg" id="s-theme"><button data-v="auto" class="' + (S.theme === 'auto' ? 'on' : '') + '">自動</button><button data-v="light" class="' + (S.theme === 'light' ? 'on' : '') + '">淺色</button><button data-v="dark" class="' + (S.theme === 'dark' ? 'on' : '') + '">深色</button></div></div>' +
+    '<div class="switch-row"><span>隱藏金額</span><div class="seg" id="s-hide"><button data-v="0" class="' + (!S.hidden ? 'on' : '') + '">顯示</button><button data-v="1" class="' + (S.hidden ? 'on' : '') + '">隱藏</button></div></div></section>' +
+    '<section class="card"><div class="card-h">' + icon('list') + '<h2>關於</h2></div><p class="sub" style="margin:0 0 12px;font-size:14px">資料全部存在你的 Google 試算表（帳戶／快照／紀錄／目標 四個分頁），舊的年度分頁保留在「舊_年份」。</p>' +
+    (S.data.me ? '<p class="muted" style="margin:0;font-size:13px">登入身分：' + esc(S.data.me) + '</p>' : '') + '</section>' +
+    priceStatusCard() +
+    '</div></div>';
+}
+function priceStatusCard() {
+  const st = S.data.priceStatus;
+  const body = st
+    ? '<p class="sub" style="margin:0 0 8px;font-size:14px">上次更新：' + esc(st.at) + '</p><div class="list">' + st.log.map(l => '<div class="row" style="padding:7px 4px;font-size:13px">' + esc(l) + '</div>').join('') + '</div>'
+    : '<p class="sub" style="margin:0;font-size:14px">還沒開始自動更新。請在 Apps Script 編輯器選「Market.gs」，執行「setupDaily」一次。</p>';
+  return '<section class="card"><div class="card-h">' + icon('refresh') + '<h2>股價自動更新</h2></div>' + body + '</section>';
+}
+function mountSettings() {
+  $('#add-acc').onclick = () => accountForm(null);
+  $$('[data-edit-acc]').forEach(b => b.onclick = () => accountForm(S.D.acc[b.dataset.editAcc]));
+  $$('[data-mv]').forEach(b => b.onclick = () => {
+    const [i, d] = b.dataset.mv.split(',').map(Number);
+    const ids = S.data.accounts.map(a => a.id);
+    [ids[i], ids[i + d]] = [ids[i + d], ids[i]];
+    call('saveAccountOrder', [ids], '已調整順序');
+  });
+  $('#g-save').onclick = () => {
+    const amt = evalExpr($('#g-amt').value);
+    if (!amt || isNaN(amt)) { toast('請輸入目標金額'); return; }
+    const ch = evalExpr($('#g-ch').value);
+    if (ch !== null && (isNaN(ch) || ch <= amt)) { toast('挑戰目標要比年度目標高'); return; }
+    const year = $('#g-year').value.trim();
+    const cur = S.data.challenges && S.data.challenges[year];
+    call('setGoal', [year, amt, $('#g-name').value.trim()], ch && !(cur && cur.amount === ch) ? null : '目標已更新').then(ok => {
+      if (ok && ch && !(cur && cur.amount === ch)) call('setGoal', [year, ch, '挑戰目標'], '目標已更新');
+    });
+  };
+  segBind('#s-updown', v => { S.updown = v; store.set('updown', v); applyPrefs(); render(); });
+  segBind('#s-theme', v => { S.theme = v; store.set('theme', v); applyPrefs(); render(); });
+  segBind('#s-hide', v => { S.hidden = v === '1'; store.set('hidden', S.hidden); render(); });
+  segBind('#s-quiet', v => { S.quiet = v === '1'; store.set('quiet', S.quiet); render(); });
+  $('#gw-status-btn').onclick = openPetStatus;
+}
+function segBind(sel, fn) { $$(sel + ' button').forEach(b => b.onclick = () => fn(b.dataset.v)); }
+
+function accountForm(a) {
+  const opt = (list, cur) => list.map(x => '<option' + (x === cur ? ' selected' : '') + '>' + x + '</option>').join('');
+  openSheet('<div class="sheet-h"><h3>' + (a ? '編輯帳戶' : '新增帳戶') + '</h3><button class="icon-btn" data-close aria-label="關閉">' + icon('x', 'inv') + '</button></div>' +
+    '<label class="field"><span>名稱</span><input class="input" id="a-name" value="' + esc(a ? a.name : '') + '" placeholder="例如：台新活存、00919"></label>' +
+    '<label class="field"><span>類型</span><select class="input" id="a-type">' + opt(S.data.types, a ? a.type : '銀行存款') + '</select></label>' +
+    '<label class="field"><span>狀態</span><select class="input" id="a-status">' + opt(['使用中', '已結清'], a ? a.status : '使用中') + '</select></label>' +
+    '<label class="field"><span>股價代號（選填）</span><input class="input" id="a-code" autocapitalize="characters" value="' + esc(a ? a.code || '' : '') + '" placeholder="例如 0050；基金填 Yahoo 基金代碼"></label>' +
+    '<p class="muted" style="font-size:12px;margin:-4px 0 16px">基金和股票ETF 類型的帳戶，記帳時會多一格「投入成本」。填了股價代號，就會每天自動估算市值（只支援上市股票和 ETF；基金代碼在 Yahoo 股市基金頁的網址裡，例如 F0HKG05WWP:FO）。已結清的帳戶不會出現在記帳畫面，但歷史資料會保留。</p>' +
+    '<button class="btn primary" id="a-save">儲存</button>');
+  $('#a-save').onclick = async () => {
+    const ok = await call('saveAccount', [{ id: a ? a.id : null, name: $('#a-name').value, type: $('#a-type').value, status: $('#a-status').value, code: $('#a-code').value }], '帳戶已儲存');
+    if (ok) closeSheet();
+  };
+}
+
+// ═════════ 浮層 ═════════
+let sheetChart = null;
+function openSheet(html) {
+  if (sheetChart) { sheetChart.destroy(); sheetChart = null; }
+  const s = $('#sheet');
+  s.innerHTML = '<div class="grab"></div>' + html;
+  s.scrollTop = 0;
+  s.classList.add('on');
+  $('#sheet-bg').classList.add('on');
+  $$('[data-close]', s).forEach(b => b.onclick = closeSheet);
+}
+function closeSheet() {
+  $('#sheet').classList.remove('on');
+  $('#sheet-bg').classList.remove('on');
+  if (sheetChart) { sheetChart.destroy(); sheetChart = null; }
+}
+function confirmBox(msg, okLabel) {
+  return new Promise(res => {
+    openSheet('<div class="sheet-h"><h3>確認</h3></div><p class="sub" style="margin:0 0 20px">' + esc(msg) + '</p><div class="btn-row"><button class="btn" id="cf-no">取消</button><button class="btn primary" id="cf-ok" style="background:var(--red)">' + esc(okLabel) + '</button></div>');
+    $('#cf-no').onclick = () => { closeSheet(); res(false); };
+    $('#cf-ok').onclick = () => { closeSheet(); res(true); };
+  });
+}
+
+// ═════════ 股娃娃訪客：在其他頁面偶爾從右下角探頭 ═════════
+const VISIT_LINES = {
+  market: ['新聞每天早上 9:30 更新', '點指標卡可以看它跟你有什麼關係', '這裡只說發生什麼事，不叫你買賣喔'],
+  records: ['這裡是你的記帳歷史', '點一筆可以看當時的明細', '每一年都好努力！'],
+  analysis: ['看不懂圖表？點圖表旁邊戴眼鏡的我', '「資產增加從哪來」是我最喜歡的一張'],
+  settings: ['想讓我安靜一點，可以在這裡設定', '帳戶填上股價代號，我就能每天幫你算'],
+};
+function scheduleVisitor() {
+  setTimeout(() => {
+    const lines = VISIT_LINES[S.view];
+    if (lines && !S.quiet && S.data && !S.data.needsSetup && document.visibilityState === 'visible' && !$('#sheet').classList.contains('on')) {
+      const v = $('#visitor');
+      $('.gw-say', v).textContent = pickOne(lines);
+      $('img', v).src = GUGU.miniURL({ face: 'happy', body: S.pet ? S.pet.body : 'normal' });
+      v.classList.add('on');
+      setTimeout(() => v.classList.remove('on'), 5000);
+    }
+    scheduleVisitor();
+  }, 35000 + Math.random() * 25000);
+}
+
+// ═════════ 盤中即時：開盤時間每 20 秒抓一次 ═════════
+const LIVE_MS = 20000;
+function marketOpenNow() {
+  const t = new Date(Date.now() + 8 * 3600e3), day = t.getUTCDay(), m = t.getUTCHours() * 60 + t.getUTCMinutes();
+  return day >= 1 && day <= 5 && m >= 8 * 60 + 58 && m <= 13 * 60 + 33;
+}
+async function pollLive(force) {
+  if (!S.data || S.data.needsSetup || S.liveBusy || document.visibilityState !== 'visible') return;
+  if (!force && !marketOpenNow()) return;
+  S.liveBusy = true;
+  try { S.live = await api('getQuotes'); applyLive(); }
+  catch (e) { /* 即時報價失敗不打擾使用者，下次再試 */ }
+  finally {
+    S.liveBusy = false;
+    if (!S.liveTried) { S.liveTried = true; if (S.view === 'home' && GW.stage && S.fresh) autoplay(GW.stage); }
+  }
+}
+/** 只更新數字，不整頁重畫（股娃娃的演出不會被打斷） */
+function applyLive() {
+  if (!S.D) return;
+  S.D.mk = computeMarket(S.data, S.D.recs, S.D.px, S.live && S.live.quotes);
+  if (S.view === 'home') {
+    const h = $('#hero-live'), tb = $('#today-body');
+    if (h && S.D.latest) h.outerHTML = heroInner(S.D.latest);
+    if (tb) tb.innerHTML = todayBody();
+    if (GW.stage) GW.stage.setToday(S.D.mk.ok ? S.D.mk.pct : 0);
+  } else if (S.view === 'market' && !$('#sheet').classList.contains('on')) {
+    const y = window.scrollY; render(); window.scrollTo(0, y);
+  }
+}
+
+// ═════════ 啟動 ═════════
+function applyPrefs() {
+  const root = document.documentElement;
+  if (S.theme === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', S.theme);
+  root.setAttribute('data-updown', S.updown);
+}
+async function load(showBusy) {
+  if (showBusy) busy(true);
+  try {
+    const data = await api('getAppData');
+    S.loadedAt = Date.now();
+    S.fresh = true;
+    setData(data, !showBusy);
+    if (!S.visited && !data.needsSetup) { S.visited = true; api('touchCare', 'visit').then(c => { S.care = c; }).catch(() => {}); }
+    if (!data.needsSetup) pollLive(true);
+  }
+  catch (e) { toast('讀取失敗：' + (e && e.message ? e.message : e)); }
+  finally { busy(false); }
+}
+function init() {
+  applyPrefs();
+  paintIcons(document);
+  $$('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
+  $('#btn-eye').onclick = () => { S.hidden = !S.hidden; store.set('hidden', S.hidden); render(); };
+  $('#btn-refresh').onclick = () => load(true);
+  $('#sheet-bg').onclick = closeSheet;
+  if (window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (S.theme === 'auto' && S.data) render(); });
+  Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+  $('#brand-mon').src = GUGU.miniURL({ face: 'happy' });
+  $('#busy-img').src = GUGU.miniURL({ face: 'happy', walk: true });
+  $('#visitor img').onclick = () => { $('#visitor').classList.remove('on'); go('home'); };
+  scheduleVisitor();
+  setInterval(() => pollLive(false), LIVE_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    if (Date.now() - S.loadedAt > 5 * 60e3) load(false); else pollLive(true);
+  });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if (!apiKey()) return keyGate();
+  const cached = store.get('cache', null);
+  if (cached && !cached.needsSetup) { S.data = cached; S.D = derive(cached); }
+  render();
+  load(false);
+  if (location.hash && !standalone()) addToHomeHint();
+}
+const standalone = () => navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+
+/** 沒有密碼時：貼上設定連結 */
+function keyGate() {
+  $('main').innerHTML = '<div class="card empty" style="margin-top:24px">' + mini({ face: 'worry', acc: 'question' }, 'bob') +
+    '<p>股娃娃還不認識這台手機。<br>請貼上你的設定連結：</p>' +
+    '<input id="key-in" class="input" style="width:100%;margin:8px 0" placeholder="https://jengjih.github.io/gugu/#k=…" autocomplete="off">' +
+    '<button class="btn primary" id="key-ok">開始使用</button></div>';
+  $('#key-ok').onclick = () => {
+    const v = $('#key-in').value.trim(), m = v.match(/k=([\w-]+)/) || v.match(/^([\w-]{20,})$/);
+    if (!m) return toast('請貼上完整的設定連結');
+    store.set('key', m[1]);
+    location.reload();
+  };
+}
+
+/** 在 Safari 用設定連結打開時：提醒加到主畫面（網址要保留 #k=… 才帶得過去） */
+function addToHomeHint() {
+  openSheet('<div class="sheet-h">' + mini({ face: 'happy' }) + '<h3>把股娃娃放到主畫面</h3></div>' +
+    '<ol style="line-height:1.9;padding-left:1.3em"><li>點 Safari 下方的「分享」按鈕（方框加向上箭頭）</li><li>往下滑，點「加入主畫面」</li><li>名稱確認是「股娃娃」，點「加入」</li></ol>' +
+    '<p class="muted">之後從主畫面打開，就不會有 Safari 的網址列和按鈕了。這個網址裡有你的密碼，請不要分享給別人。</p>' +
+    '<div class="btn-row"><button class="btn" data-close>知道了</button></div>');
+}
+init();
 </script>
 </body>
 </html>
