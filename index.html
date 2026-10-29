@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>股娃娃</title>
+<meta name="apple-mobile-web-app-title" content="股娃娃">
+<meta name="application-name" content="股娃娃">
+<meta name="theme-color" content="#BFE7FF">
+<meta name="robots" content="noindex">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #BFE7FF; color: #1B1E3C;
+         font: 16px/1.6 -apple-system, "PingFang TC", "Noto Sans TC", sans-serif; }
+  .box { max-width: 340px; padding: 24px 16px; text-align: center; }
+  img { width: 120px; height: 120px; border-radius: 27px; image-rendering: pixelated; box-shadow: 4px 4px 0 #1B1E3C; }
+  h1 { font-size: 22px; margin: 16px 0 8px; }
+  ol { text-align: left; padding-left: 1.4em; }
+  #setup { display: none; }
+  a { color: #1B1E3C; }
+</style>
+</head>
+<body>
+<div class="box">
+  <img src="apple-touch-icon.png" alt="股娃娃">
+  <h1>股娃娃</h1>
+  <div id="go">正在打開…（沒反應請<a id="link" href="#">點這裡</a>）</div>
+  <div id="setup">
+    <p>把股娃娃放到主畫面：</p>
+    <ol>
+      <li>點 Safari 下方的「分享」按鈕（方框加向上箭頭）</li>
+      <li>往下滑，點「加入主畫面」</li>
+      <li>名稱確認是「股娃娃」，點「加入」</li>
+    </ol>
+    <p>之後從主畫面點股娃娃，就會直接打開 App。</p>
+  </div>
+</div>
+<script>
+  // 正式 App 網址（Apps Script 部署；只有本人帳號能開）
+  var APP = 'https://script.google.com/macros/s/AKfycbyDYlQdwvC1t7l0TJeLgFeVXhRastKPxwJRiw9tUiFqEoCLaHy6kL5c_1qZa7LHubQkmQ/exec';
+  document.getElementById('link').href = APP;
+  if (location.search.indexOf('setup') >= 0) {
+    // 設定模式：顯示教學，並把網址改回不帶 ?setup，這樣加入主畫面後點開會直接轉址
+    history.replaceState(null, '', location.pathname);
+    document.getElementById('go').style.display = 'none';
+    document.getElementById('setup').style.display = 'block';
+  } else {
+    location.replace(APP);
+  }
+</script>
+</body>
+</html>
