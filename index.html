@@ -447,6 +447,7 @@ const GUGU = (() => {
   const pick = a => a[Math.floor(Math.random() * a.length)];
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const FPS = 12, STEP = 1 / FPS;
+  const sfx = n => { if (typeof SFX !== 'undefined') SFX.play(n); };
 
   // ── 小怪獸本體（16×14）與表情 ──
   const PAL = { o: '#1B1E3C', b: '#3CCBAA', d: '#23977E', l: '#A6F0DC', w: '#FFFFFF', k: '#1B1E3C', c: '#FF8FA3', y: '#FFC94A', m: '#C2414B' };
@@ -473,6 +474,7 @@ const GUGU = (() => {
     sad: { 6: '.obbkbbbbbbkbbo.', 7: '.obbwkbbbbwkbbo.', 9: '.obbbbbkkbbbbbo.', 10: '.odbbbkbbkbbbdo.' },
     worry: { 6: '.obkbbbbbbbbkbo.', 7: '.obbwkbbbbwkbbo.', 9: '.obbbbbbbbbbbbo.', 10: '.odbbbkkkkbbbdo.' },
     tired: { 6: '.obbbbbbbbbbbbo.', 7: '.obbkkbbbbkkbbo.', 9: '.obbbbbbbbbbbbo.', 10: '.odbbbbkkbbbbdo.' },
+    dizzy: { 6: '.obkbkbbbbkbkbo.', 7: '.obbkbbbbbbkbbo.', 8: '.obkbkbbbbkbkbo.', 9: '.obbbbkbkbkbbbo.' },
     eat: { 6: '.obbkkbbbbkkbbo.', 7: '.obkbbkbbkbbkbo.', 9: '.obbbbkmmkbbbbo.', 10: '.odbbbkmmkbbbdo.' },
   };
   const FEET_WALK = '....oo....oo....';
@@ -766,7 +768,7 @@ const GUGU = (() => {
   // ═════════ 舞台 ═════════
   /**
    * opts: { bubble: 舞台對話框元素, page: PageLayer, heroEl(): 主卡元素, leakEl(): 漏雨落點元素,
-   *         onLongPress(), onTap() }
+   *         onLongPress(), onTap(), petLines() 額外的摸摸台詞 }
    */
   function Stage(canvas, opts) {
     opts = opts || {};
@@ -835,6 +837,7 @@ const GUGU = (() => {
       if (!opts.bubble) return;
       if (!text) { opts.bubble.classList.remove('on'); S.talkUntil = 0; return; }
       opts.bubble.textContent = text;
+      if (!S.scene) sfx('talk');
       opts.bubble.classList.add('on');
       S.talkUntil = S.t + 999;
       S.talkEnd = performance.now() + (sec || 3.5) * 1000;
@@ -871,13 +874,20 @@ const GUGU = (() => {
         if (m.walkTo !== null) {
           const d = m.walkTo - m.wx;
           if (Math.abs(d) <= 1) { m.wx = m.walkTo; m.walkTo = null; m.walk = false; }
-          else { m.wx += Math.sign(d) * (st.body === 'flat' ? 0.6 : 1.2); m.flip = d < 0; m.walk = S.tick % 4 < 2; }
+          else { m.wx += Math.sign(d) * (st.body === 'flat' ? 0.6 : 1.2); m.flip = d < 0; m.walk = S.tick % 4 < 2; if (S.tick % 4 === 0) sfx('step'); }
           // 鏡頭跟著走
           S.pan = clamp(S.pan + ((m.wx + 8 - S.W / 2) - S.pan) * 0.15, 0, S.WW - S.W);
         }
         const T = S.today;
         let base = st.lonely ? 'sad' : st.body === 'flat' ? 'tired' : st.mood >= 70 ? 'happy' : st.mood <= 30 ? 'sad' : 'idle';
         if (!st.lonely && T.dir) base = T.dir > 0 ? 'happy' : T.lv >= 2 ? 'worry' : 'sad';
+        // 深夜（0–6 點）睏睏：表情 tired、頭上冒 Zz
+        if (S.tick % 600 === 1) S.sleepy = new Date().getHours() < 6;
+        if (S.sleepy && !st.lonely && m.walkTo === null) {
+          base = 'tired';
+          if (S.tick % 30 === 0) S.parts.push({ k: 'zz', x: m.wx + 13, y: groundY() - 18, vx: 3, vy: -4, life: 2.2 });
+          if (S.tick % 240 === 120) sfx('snore');
+        }
         // 跌到中跌以上：一直撐著傘，停下來就蹲坐
         const rainy = T.dir < 0 && T.lv >= 1;
         m.prop = rainy ? 'umbrella' : null;
@@ -924,7 +934,7 @@ const GUGU = (() => {
           S.darkCloud.x += Math.round((m.wx - 5 - S.darkCloud.x) * 0.2);
           if (S.tick % 30 === 0) S.parts.push({ k: 'tear', x: m.wx + rnd(4, 12), y: groundY() - 7, vy: 18, life: 0.4 });
           if (S.tick % 110 === 55) {
-            S.flash = 2;
+            S.flash = 2; sfx('thunder');
             let x = Math.round(m.wx + rnd(-10, 26)); const pts = [];
             for (let y = 9; y < groundY(); y++) { pts.push([x, y]); if (y % 3 === 0) x += Math.random() < 0.5 ? -1 : 1; }
             S.parts.push({ k: 'bolt', x: 0, y: 0, pts, life: 0.25 });
@@ -934,10 +944,10 @@ const GUGU = (() => {
         if (S.tick % (T.lv >= 1 ? 24 : 40) === 0) sparkles(cx, top - 2, T.lv >= 1 ? 3 : 2, 9);
         if (T.lv >= 1 && S.tick % 30 === 0 && S.parts.filter(p => p.k === 'fly').length < 3) S.parts.push({ k: 'fly', x: S.pan + rnd(0, S.W), y: rnd(8, groundY() - 8), life: 8, ph: rnd(0, 6) });
         if (T.lv >= 1 && S.tick % 60 === 20) S.parts.push({ k: 'coin', x: cx + rnd(-3, 3), y: -4, vy: 26, life: 2, upd(p) {
-          if (p.y >= groundY() - 14 + S.mon.y) { p.age = 99; sparkles(p.x, groundY() - 16, 2, 3); S.mon.hopUntil = S.tick + 6; }
+          if (p.y >= groundY() - 14 + S.mon.y) { p.age = 99; sparkles(p.x, groundY() - 16, 2, 3); S.mon.hopUntil = S.tick + 6; sfx('coin'); }
         } });
         if (T.lv >= 2) {
-          if (S.tick % 30 === 0) burst(S.pan + rnd(10, S.W - 10), rnd(4, 12), 14, UPC());
+          if (S.tick % 30 === 0) { burst(S.pan + rnd(10, S.W - 10), rnd(4, 12), 14, UPC()); sfx('boom'); }
           if (S.tick % 2 === 0) S.parts.push({ k: 'px', x: S.pan + rnd(0, S.W), y: -2, vy: rnd(14, 22), vx: rnd(-4, 4), c: pick(UPC()), life: 3 });
         }
       }
@@ -1033,6 +1043,7 @@ const GUGU = (() => {
         case 'smoke': dot(ctx, x, p.y, S.theme === 'dark' ? '#5A608A' : '#E6E8EF', p.age < 1 ? 1 : 2); break;
         case 'tumble': spr(ctx, TUMBLE[Math.floor(p.age * 8) % 4], x, p.y, { t: '#A88B5A' }); break;
         case 'tear': dot(ctx, x, p.y, '#6FB7FF'); break;
+        case 'zz': [[0, 0], [1, 0], [2, 0], [1, 1], [0, 2], [1, 2], [2, 2]].forEach(([a, b]) => dot(ctx, x + a, p.y + b, S.theme === 'dark' ? '#B9BDD6' : '#4A4F6E')); break;
         case 'fly': spr(ctx, BUTTERFLY[S.tick % 4 < 2 ? 0 : 1], x + Math.sin(p.age * 2 + p.ph) * 6, p.y + Math.sin(p.age * 3 + p.ph) * 3, { y: '#FFC94A', o: '#1B1E3C' }); break;
         case 'petal': dot(ctx, x + Math.sin(p.age * 2) * 3, p.y, p.c); break;
         case 'bolt': ctx.fillStyle = '#FFE36E'; p.pts.forEach(([bx, by]) => ctx.fillRect(X(bx), by, 1, 1)); break;
@@ -1102,25 +1113,26 @@ const GUGU = (() => {
       up1: () => ({ dur: 2.6, step(t) {
         const m = S.mon; m.face = 'happy';
         m.y = t < 0.5 ? hop(t / 0.5, 6) : t < 1.0 ? hop((t - 0.5) / 0.5, 4) : 0;
-        if (at(t, 0.25)) { say('耶！', 2); S.parts.push({ k: 'coin', x: center(), y: groundY() - 20, vy: -9, life: 1.6 }); sparkles(center(), groundY() - 20, 5, 7); }
+        if (at(t, 0.25)) { sfx('up1'); say('耶！', 2); S.parts.push({ k: 'coin', x: center(), y: groundY() - 20, vy: -9, life: 1.6 }); sparkles(center(), groundY() - 20, 5, 7); }
       } }),
       up2: () => ({ dur: 4.4, step(t) {
         const m = S.mon; m.face = 'happy';
-        if (at(t, 0)) say('金幣雨～', 3);
+        if (at(t, 0)) { sfx('up2'); say('金幣雨～', 3); }
         const beat = Math.floor(t / 0.35);
         m.flip = beat % 2 === 1;
         m.wx = home() + (beat % 4 < 2 ? -4 : 4);
         m.y = hop((t % 0.35) / 0.35, 3);
         if (t < 3.2 && S.tick % 2 === 0) S.parts.push({ k: 'coin', x: home() + 8 + rnd(-18, 18), y: -4, vy: rnd(20, 30), life: 3, upd(p) {
           const top = groundY() - 14 + S.mon.y;
-          if (p.y >= top && Math.abs(p.x - center()) < 8) { p.age = 99; sparkles(p.x, top, 2, 3); }
+          if (p.y >= top && Math.abs(p.x - center()) < 8) { p.age = 99; sparkles(p.x, top, 2, 3); sfx('coin'); }
           else if (p.y >= groundY() - 3) p.age = 99;
         } });
       }, end() { S.mon.wx = home(); S.mon.flip = false; } }),
       // 大漲：噴射衝出舞台，降落在總資產卡上，蹦跳放煙火，再跳回來
       up3: () => ({ dur: 6, step(t) {
         const m = S.mon; m.face = 'happy';
-        if (at(t, 0)) say('衝啊！', 1.2);
+        if (at(t, 0)) { sfx('charge'); say('衝啊！', 1.2); }
+        if (at(t, 0.5)) sfx('rocket');
         if (t < 0.5) { m.y = 1; m.wx = home() + (S.tick % 2 ? 1 : 0); return; }
         if (t < 1.0) { m.prop = 'flame'; m.y = -Math.round(Math.pow((t - 0.5) / 0.5, 2) * 16); S.parts.push({ k: 'px', back: true, x: center() + rnd(-3, 3), y: groundY() - 1, vx: rnd(-10, 10), vy: rnd(-6, -2), c: pick(['#C9CEDF', '#FFFFFF']), life: 0.8 }); return; }
         m.prop = null;
@@ -1129,14 +1141,14 @@ const GUGU = (() => {
           if (k < STEP) press(to.el);
           if (at(k, 0.45)) press(to.el);
           opts.page.set(to.x, to.y + b, k > 1.0 ? 'happy' : 'happy');
-          if (at(k, 0.2)) { opts.page.confetti(); opts.page.say('破框啦！', 2); }
-          if (k > 0.3 && k < 2.2 && S.tick % 4 === 0) opts.page.firework(to.x + rnd(-40, 56), to.y - rnd(6, 26));
+          if (at(k, 0.2)) { sfx('fanfare'); opts.page.confetti(); opts.page.say('破框啦！', 2); }
+          if (k > 0.3 && k < 2.2 && S.tick % 4 === 0) { opts.page.firework(to.x + rnd(-40, 56), to.y - rnd(6, 26)); sfx('boom'); }
         } });
         if (done) { m.y = 0; }
       }, end() { S.mon.prop = null; S.mon.y = 0; S.mon.out = false; S.ex = null; if (opts.page) opts.page.hide(); } }),
       down1: () => ({ dur: 3.4, step(t) {
         const m = S.mon; m.face = 'sad';
-        if (at(t, 0)) { say('唉…', 2.5); S.leafOnHead = false; }
+        if (at(t, 0)) { sfx('down1'); say('唉…', 2.5); S.leafOnHead = false; }
         if (t > 0.3 && t < 1.2 && S.tick % 3 === 0) S.parts.push({ k: 'puff', x: center() + 5, y: groundY() - 6, vx: rnd(4, 8), vy: rnd(-3, -1), life: 1.2 });
         if (at(t, 0.5)) S.parts.push({ k: 'leaf', x: center(), y: -5, vy: 9, life: 2.6, upd(p) {
           p.x = S.mon.wx + 9 + Math.round(Math.sin(p.age * 2.4) * 5);
@@ -1145,19 +1157,19 @@ const GUGU = (() => {
       } }),
       down2: () => ({ dur: 5, gloomy: true, step(t) {
         const m = S.mon; m.face = 'sad'; m.sit = true; m.prop = 'umbrella';
-        if (at(t, 0)) { say('下雨了…', 3); S.leafOnHead = false; }
+        if (at(t, 0)) { sfx('down2'); say('下雨了…', 3); S.leafOnHead = false; }
         S.rain = t < 4.3 ? 1 : 0;
         if (at(t, 0.8)) S.parts.push({ k: 'tumble', back: true, x: S.pan - 12, y: groundY() - 11, vx: 24, life: 6, upd(p) { p.y = groundY() - 11 - Math.abs(Math.round(Math.sin(p.age * 5) * 3)); } });
       }, end() { S.mon.prop = null; S.mon.sit = false; S.rain = 0; } }),
       // 大跌：烏雲壓頂，雨從舞台漏到下面的卡片
       down3: () => ({ dur: 6.4, gloomy: true, step(t) {
         const m = S.mon; m.face = t < 2.5 ? 'worry' : 'sad'; m.prop = t > 2.4 ? 'umbrella' : null;
-        if (at(t, 0)) { S.leafOnHead = false; S.darkCloud = { rows: cloudShape(26, 9), x: S.pan - 26, y: 1, w: 26 }; }
+        if (at(t, 0)) { sfx('down3'); S.leafOnHead = false; S.darkCloud = { rows: cloudShape(26, 9), x: S.pan - 26, y: 1, w: 26 }; }
         if (S.darkCloud) S.darkCloud.x = Math.min(m.wx - 5, Math.round(S.pan - 26 + t * 40));
         S.rain = t > 0.8 && t < 5.8 ? 3 : 0;
         if (t > 1 && t < 2.4 && S.tick % 4 === 0) S.parts.push({ k: 'tear', x: m.wx + rnd(4, 12), y: groundY() - 7, vy: 18, life: 0.4 });
         if (at(t, 1.6) || at(t, 3.4)) {
-          S.flash = 2;
+          S.flash = 2; sfx('thunder');
           let x = Math.round(m.wx + rnd(-6, 20)); const pts = [];
           for (let y = 9; y < groundY(); y++) { pts.push([x, y]); if (y % 3 === 0) x += Math.random() < 0.5 ? -1 : 1; }
           S.parts.push({ k: 'bolt', x: 0, y: 0, pts, life: 0.25 });
@@ -1169,42 +1181,62 @@ const GUGU = (() => {
         }
         if (at(t, 2.2) && opts.leakEl && opts.page) opts.page.puddle(opts.leakEl());
       }, end() { S.mon.prop = null; S.darkCloud = null; S.rain = 0; } }),
+      // 連點兩下：跳高高
+      jump: () => ({ dur: 1.1, light: true, step(t) {
+        const m = S.mon; m.face = 'happy';
+        m.y = hop(t / 0.8, 14);
+        if (at(t, 0)) { sfx('jump'); if (Math.random() < 0.4) say(pick(['咻～', '看我跳！', '再高一點！', '我會飛！']), 1.6); }
+        if (at(t, 0.4)) sparkles(center(), groundY() - 30, 4, 6);
+      } }),
+      // 一直戳：轉圈圈頭暈
+      dizzy: () => ({ dur: 2.8, step(t) {
+        const m = S.mon;
+        if (at(t, 0)) { sfx('dizzy'); say(pick(['頭暈了～', '不要一直戳啦！', '轉圈圈…咕嚕咕嚕', '星星在轉…']), 2.6); }
+        m.face = t < 1.0 ? 'happy' : 'dizzy';
+        m.flip = t < 1.0 ? S.tick % 2 === 0 : false;
+        m.y = t < 1.0 ? -1 : 0;
+        m.wx = home() + (t > 1.0 ? Math.round(Math.sin(t * 6) * 2) : 0);
+        if (t > 1.0 && S.tick % 3 === 0) { const a = t * 5; S.parts.push({ k: 'spark', x: center() + Math.cos(a) * 9, y: groundY() - 19 + Math.sin(a) * 2, c: '#FFC94A', life: 0.3 }); }
+      }, end() { S.mon.wx = home(); S.mon.flip = false; } }),
       // 摸摸
-      pet: () => ({ dur: 1.6, step(t) {
+      pet: () => ({ dur: 1.6, light: true, step(t) {
         const m = S.mon; m.face = 'happy';
         m.y = hop(t / 0.5, 4);
-        if (at(t, 0)) { hearts(center(), groundY() - 16, 3); say(pick(petLines()), 2.5); }
+        if (at(t, 0)) { sfx('pet'); hearts(center(), groundY() - 16, 3); say(pick(petLines()), 2.5); }
       } }),
       // 寂寞後重逢
       reunion: () => ({ dur: 2.6, step(t) {
         const m = S.mon; m.face = 'happy';
         m.y = t < 1.5 ? hop((t % 0.5) / 0.5, 6) : 0;
-        if (at(t, 0)) { say('你終於來了！', 3); hearts(center(), groundY() - 16, 5); }
+        if (at(t, 0)) { sfx('reunion'); say('你終於來了！', 3); hearts(center(), groundY() - 16, 5); }
       } }),
       // 記帳餵食
       eat: () => ({ dur: 3, step(t) {
         const m = S.mon;
+        if (at(t, 0)) sfx('coinDrop');
         if (at(t, 0)) S.parts.push({ k: 'coin', x: center(), y: -6, vy: 30, life: 1.2, upd(p) { if (p.y >= groundY() - 7) p.age = 99; } });
         m.face = t > 0.9 && t < 2.0 ? (S.tick % 3 === 0 ? 'happy' : 'eat') : 'happy';
-        if (at(t, 1.0)) { say('好吃！記帳辛苦了', 2.5); hearts(center(), groundY() - 16, 2); }
+        if (at(t, 1.0)) { sfx('chomp'); say('好吃！記帳辛苦了', 2.5); hearts(center(), groundY() - 16, 2); }
         m.y = t > 2 ? hop((t - 2) / 0.4, 3) : 0;
       } }),
       // 創新高：扛旗跳上主卡插旗
       flag: () => ({ dur: 4.2, step(t) {
         const m = S.mon; m.face = 'happy';
-        if (at(t, 0)) { say('創新高！', 1.4); m.prop = 'flag'; }
+        if (at(t, 0)) { sfx('flagUp'); say('創新高！', 1.4); m.prop = 'flag'; }
         if (t < 0.5) return;
         m.prop = null;
         const done = excursion(t, 0.5, () => heroTarget(0.86), { dur: 1.6, step(k, to) {
           opts.page.set(to.x, to.y + (k < 0.4 ? hop(k / 0.4, 4) : 0), 'happy', k < 0.5 ? 'flag' : null);
-          if (at(k, 0.5)) { S.flagOnHero = true; opts.page.plantFlag(to.el); press(to.el); opts.page.say('插旗！', 2); }
+          if (at(k, 0.5)) { sfx('flag'); S.flagOnHero = true; opts.page.plantFlag(to.el); press(to.el); opts.page.say('插旗！', 2); }
         } });
         if (done) m.y = 0;
       }, end() { S.mon.prop = null; S.mon.out = false; S.ex = null; if (opts.page) opts.page.hide(); } }),
     };
     function petLines() {
       const st = S.state;
-      const l = ['嘿嘿', '再摸一下', '今天也要記得喝水'];
+      if (S.sleepy) return ['嗯…？你也睡不著嗎', 'Zzz…（被摸醒）', '好睏…明天再看盤吧', '早點睡，錢不會跑掉的'];
+      const l = ['嘿嘿', '再摸一下', '今天也要記得喝水', '好癢！', '最喜歡你了', '摸頭會長高嗎？', '嗯～舒服', '再摸就要收費了（騙你的）'];
+      if (opts.petLines) l.push(...opts.petLines());
       if (st.streak >= 3) l.push(st.streak + ' 連漲！我好圓', '最近好開心～');
       if (st.streak <= -2) l.push('肚子有點餓…', '會漲回來的吧？');
       if (st.level >= 5) l.push('我們的房子很溫暖');
@@ -1224,7 +1256,7 @@ const GUGU = (() => {
     }
 
     // ── 互動：點、長按、拖曳、傾斜 ──
-    let down = null, lp = 0, tiltAsked = false;
+    let down = null, lp = 0, tiltAsked = false, taps = [];
     function hitFlag(ev) {
       const r = canvas.getBoundingClientRect(), s = r.width / S.W;
       const x = (ev.clientX - r.left) / s, y = (ev.clientY - r.top) / s;
@@ -1240,7 +1272,7 @@ const GUGU = (() => {
     canvas.addEventListener('pointerdown', ev => {
       down = { x: ev.clientX, y: ev.clientY, pan: S.pan, drag: false, long: false };
       clearTimeout(lp);
-      lp = setTimeout(() => { if (down && !down.drag && hitMon(ev).hit) { down.long = true; if (opts.onLongPress) opts.onLongPress(); } }, 550);
+      lp = setTimeout(() => { if (down && !down.drag && hitMon(ev).hit) { down.long = true; sfx('menu'); if (opts.onLongPress) opts.onLongPress(); } }, 550);
       askTilt();
     });
     canvas.addEventListener('pointermove', ev => {
@@ -1253,12 +1285,21 @@ const GUGU = (() => {
       clearTimeout(lp);
       if (!down) return;
       const d = down; down = null;
-      if (d.drag || d.long || S.scene) return;
+      if (d.drag || d.long || (S.scene && !S.scene.light)) return;
       const fi = hitFlag(ev);
-      if (fi >= 0) { const f = S.flags[fi]; say(f.label + (f.date ? '（' + f.date.replace(/-/g, '/') + '）' : ''), 4); S.mon.walkTo = clamp(3 + fi * 5 + 6, 2, S.WW - 18); return; }
+      if (fi >= 0) { sfx('ding'); const f = S.flags[fi]; say(f.label + (f.date ? '（' + f.date.replace(/-/g, '/') + '）' : ''), 4); S.mon.walkTo = clamp(3 + fi * 5 + 6, 2, S.WW - 18); return; }
       const h = hitMon(ev);
-      if (h.hit) { if (S.state.lonely) { play('reunion'); S.state.lonely = false; } else play('pet'); if (opts.onTap) opts.onTap(); }
-      else { S.mon.walkTo = clamp(Math.round(h.wx - 8), 2, S.WW - 18); }
+      if (h.hit) {
+        // 連點兩下跳高、1.8 秒內戳 6 下會頭暈
+        const now = performance.now();
+        taps = taps.filter(x => now - x < 1800); taps.push(now);
+        if (S.state.lonely) { play('reunion'); S.state.lonely = false; }
+        else if (taps.length >= 6) { taps = []; play('dizzy'); }
+        else if (taps.length >= 2 && now - taps[taps.length - 2] < 400) play('jump');
+        else play('pet');
+        if (opts.onTap) opts.onTap();
+      }
+      else if (!S.scene) { sfx('click'); S.mon.walkTo = clamp(Math.round(h.wx - 8), 2, S.WW - 18); }
     };
     canvas.addEventListener('pointerup', endPtr);
     canvas.addEventListener('pointercancel', () => { clearTimeout(lp); down = null; });
@@ -1408,6 +1449,209 @@ const GUGU = (() => {
 
   return { NAME, mount, computeState, achievements, miniURL, LEVELS, FLAG_COLORS, monSprite, spr, PAL };
 })();
+
+// ═════════ 8-bit 音效與背景音樂（Web Audio 即時合成，不用音檔）═════════
+// iPhone 規定要等使用者第一次點畫面才能出聲；靜音鍵打開時不會出聲（ambient）。
+const SFX = (() => {
+  let ac = null, master, sfxBus, musBus, unlocked = false;
+  const on = { sfx: true, music: true };
+  const last = {};
+  const GAP = { step: 0.12, coin: 0.06, boom: 0.15, talk: 0.25, thunder: 0.8 };
+
+  const hz = n => {
+    const m = /^([A-G])(#|b)?(\d)$/.exec(n);
+    const k = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0);
+    return 440 * Math.pow(2, (k + (+m[3] + 1) * 12 - 69) / 12);
+  };
+
+  function ensure() {
+    if (ac) return ac;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    try { if (navigator.audioSession) navigator.audioSession.type = 'ambient'; } catch (e) {}
+    ac = new AC();
+    master = ac.createGain(); master.gain.value = 0.5; master.connect(ac.destination);
+    sfxBus = ac.createGain(); sfxBus.gain.value = 0.7; sfxBus.connect(master);
+    musBus = ac.createGain(); musBus.gain.value = 0.22; musBus.connect(master);
+    return ac;
+  }
+
+  // 紅白機的方波有 12.5%／25%／50% 三種寬度，音色不同
+  const waves = {};
+  function pulse(duty) {
+    if (waves[duty]) return waves[duty];
+    const n = 32, re = new Float32Array(n), im = new Float32Array(n);
+    for (let i = 1; i < n; i++) im[i] = (2 / (i * Math.PI)) * Math.sin(i * Math.PI * duty);
+    return (waves[duty] = ac.createPeriodicWave(re, im));
+  }
+
+  /** 單音：f 可以是頻率或音名；o.to 滑音、o.vib 顫音 */
+  function tone(f, t, dur, o) {
+    o = o || {};
+    const osc = ac.createOscillator(), g = ac.createGain();
+    const f0 = typeof f === 'string' ? hz(f) : f;
+    if (o.type === 'triangle' || o.type === 'sine') osc.type = o.type; else osc.setPeriodicWave(pulse(o.duty || 0.25));
+    osc.frequency.setValueAtTime(f0, t);
+    if (o.to) osc.frequency.exponentialRampToValueAtTime(typeof o.to === 'string' ? hz(o.to) : o.to, t + dur);
+    if (o.vib) {
+      const lfo = ac.createOscillator(), lg = ac.createGain();
+      lfo.frequency.value = o.vib; lg.gain.value = f0 * 0.25;
+      lfo.connect(lg); lg.connect(osc.frequency); lfo.start(t); lfo.stop(t + dur);
+    }
+    const v = o.vol == null ? 0.3 : o.vol;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(v, t + 0.005);
+    g.gain.setValueAtTime(v, t + Math.max(0.005, dur * (o.hold == null ? 0.6 : o.hold)));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(g); g.connect(o.bus || sfxBus);
+    osc.start(t); osc.stop(t + dur + 0.02);
+  }
+
+  let noiseBuf = null;
+  /** 雜訊：鼓、雷、腳步、火箭 */
+  function noise(t, dur, o) {
+    o = o || {};
+    if (!noiseBuf) {
+      noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const src = ac.createBufferSource(), flt = ac.createBiquadFilter(), g = ac.createGain();
+    src.buffer = noiseBuf; src.loop = true;
+    flt.type = o.filter || 'lowpass';
+    flt.frequency.setValueAtTime(o.f || 4000, t);
+    if (o.fTo) flt.frequency.exponentialRampToValueAtTime(o.fTo, t + dur);
+    const v = o.vol == null ? 0.2 : o.vol;
+    g.gain.setValueAtTime(v, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(flt); flt.connect(g); g.connect(o.bus || sfxBus);
+    src.start(t); src.stop(t + dur + 0.02);
+  }
+
+  /** 依序彈一串音 */
+  const run = (t, notes, len, o) => notes.forEach((n, i) => tone(n, t + i * len, len * 1.1, o));
+
+  const SOUNDS = {
+    tab: t => tone(1320, t, 0.03, { duty: 0.5, vol: 0.12 }),
+    click: t => tone(880, t, 0.04, { duty: 0.5, vol: 0.12 }),
+    talk: t => { for (let i = 0; i < 3; i++) tone(500 + Math.random() * 450, t + i * 0.065, 0.045, { duty: 0.125, vol: 0.1 }); },
+    step: t => noise(t, 0.03, { filter: 'highpass', f: 3000, vol: 0.05 }),
+    pet: t => { run(t, ['C6', 'E6'], 0.07, { duty: 0.5, vol: 0.2 }); tone('G6', t + 0.15, 0.18, { duty: 0.125, vol: 0.15 }); },
+    jump: t => tone(300, t, 0.18, { to: 1000, duty: 0.25, vol: 0.2 }),
+    coin: t => { tone('B5', t, 0.07, { duty: 0.5, vol: 0.2 }); tone('E6', t + 0.07, 0.28, { duty: 0.5, vol: 0.2, hold: 0.2 }); },
+    coinDrop: t => tone(1400, t, 0.12, { to: 700, duty: 0.5, vol: 0.15 }),
+    up1: t => { run(t, ['C5', 'E5', 'G5', 'C6'], 0.06, { duty: 0.25, vol: 0.2 }); SOUNDS.coin(t + 0.26); },
+    up2: t => { run(t, ['C5', 'E5', 'G5', 'C6', 'E6', 'G6'], 0.055, { duty: 0.25, vol: 0.2 }); tone('C7', t + 0.33, 0.35, { duty: 0.125, vol: 0.15, hold: 0.3 }); },
+    charge: t => tone(150, t, 0.5, { to: 600, duty: 0.5, vol: 0.12, vib: 18 }),
+    rocket: t => { noise(t, 0.9, { f: 600, fTo: 4000, vol: 0.25 }); tone(200, t, 0.8, { to: 1600, duty: 0.125, vol: 0.12 }); },
+    fanfare: t => { run(t, ['G5', 'C6', 'E6'], 0.09, { duty: 0.25, vol: 0.22 }); tone('G6', t + 0.27, 0.15, { duty: 0.25, vol: 0.22 }); tone('E6', t + 0.42, 0.1, { duty: 0.25, vol: 0.2 }); tone('G6', t + 0.52, 0.5, { duty: 0.25, vol: 0.22, hold: 0.4 }); },
+    boom: t => { noise(t, 0.35, { f: 1800, fTo: 200, vol: 0.18 }); tone(140, t, 0.25, { to: 40, type: 'triangle', vol: 0.25 }); },
+    down1: t => tone(520, t, 0.7, { to: 230, type: 'triangle', vol: 0.3, hold: 0.3 }),
+    down2: t => run(t, ['E5', 'C5', 'A4', 'E4'], 0.17, { type: 'triangle', vol: 0.3 }),
+    down3: t => { tone(110, t, 0.9, { to: 70, duty: 0.5, vol: 0.12 }); run(t + 0.2, ['E4', 'D4', 'B3'], 0.22, { type: 'triangle', vol: 0.3 }); },
+    thunder: t => { noise(t, 0.08, { filter: 'highpass', f: 2000, vol: 0.25 }); noise(t + 0.05, 1.3, { f: 900, fTo: 80, vol: 0.35 }); },
+    chomp: t => { for (let i = 0; i < 3; i++) { tone(220 - i * 20, t + i * 0.13, 0.06, { duty: 0.5, vol: 0.18 }); noise(t + i * 0.13, 0.04, { f: 1200, vol: 0.08 }); } },
+    flagUp: t => run(t, ['C5', 'G5', 'C6'], 0.08, { duty: 0.25, vol: 0.2 }),
+    flag: t => { run(t, ['C6', 'E6', 'G6'], 0.07, { duty: 0.25, vol: 0.2 }); tone('C7', t + 0.21, 0.45, { duty: 0.125, vol: 0.18, hold: 0.3 }); noise(t + 0.21, 0.1, { filter: 'highpass', f: 5000, vol: 0.08 }); },
+    reunion: t => run(t, ['G5', 'A5', 'B5', 'D6', 'G6'], 0.08, { duty: 0.25, vol: 0.2 }),
+    menu: t => { tone('E6', t, 0.05, { duty: 0.5, vol: 0.15 }); tone('B5', t + 0.06, 0.08, { duty: 0.5, vol: 0.15 }); },
+    ding: t => tone('E6', t, 0.35, { type: 'triangle', vol: 0.3, hold: 0.1 }),
+    ok: t => { tone('C6', t, 0.06, { duty: 0.5, vol: 0.12 }); tone('G6', t + 0.06, 0.1, { duty: 0.5, vol: 0.12 }); },
+    err: t => { tone(220, t, 0.12, { duty: 0.5, vol: 0.15 }); tone(165, t + 0.13, 0.18, { duty: 0.5, vol: 0.15 }); },
+    dizzy: t => tone(700, t, 1.1, { to: 350, duty: 0.25, vol: 0.15, vib: 9 }),
+    snore: t => tone(110, t, 0.6, { to: 160, type: 'triangle', vol: 0.12, hold: 0.5 }),
+  };
+
+  function play(name) {
+    if (!on.sfx || !ac || ac.state !== 'running' || !SOUNDS[name]) return;
+    const t = ac.currentTime;
+    if (last[name] && t - last[name] < (GAP[name] || 0.04)) return;
+    last[name] = t;
+    SOUNDS[name](t + 0.01);
+  }
+
+  // ── 背景音樂：依今天漲跌換曲（漲：輕快 C 大調／平：悠閒 F 大調／跌：慢板 A 小調）──
+  // 每首 4 小節、每小節 8 個八分音符；'_' 表示延長上一個音、'-' 表示休止
+  const SONGS = {
+    up: { bpm: 140, duty: 0.25, hat: [0, 2, 4, 6], bassEvery: 1,
+      lead: 'E5 G5 C6 _ G5 E5 G5 _ | D5 G5 B5 _ A5 G5 D5 _ | C5 E5 A5 _ G5 E5 C5 E5 | F5 A5 C6 A5 G5 _ _ _',
+      bass: ['C3', 'G2', 'A2', 'F2'] },
+    flat: { bpm: 100, duty: 0.125, hat: [0, 4], bassEvery: 2,
+      lead: 'A4 _ C5 _ F5 _ C5 _ | G4 _ C5 _ E5 _ C5 _ | A4 _ D5 _ F5 _ D5 _ | Bb4 _ D5 _ F5 _ E5 _',
+      bass: ['F2', 'C3', 'D3', 'Bb2'] },
+    down: { bpm: 84, duty: 0.125, hat: [], bassEvery: 4,
+      lead: 'A4 _ C5 _ E5 _ _ - | D5 _ F5 _ A4 _ _ - | B4 _ G#4 _ E4 _ _ - | A4 _ E4 _ A4 _ _ -',
+      bass: ['A2', 'D3', 'E2', 'A2'] },
+  };
+  let mood = 'flat', want = 'flat', timer = 0, step = 0, nextT = 0;
+
+  function parse(song) {
+    if (song.steps) return song.steps;
+    const tok = song.lead.replace(/\|/g, ' ').trim().split(/\s+/);
+    return (song.steps = tok.map((n, i) => {
+      if (n === '_' || n === '-') return null;
+      let len = 1;
+      while (tok[i + len] === '_') len++;
+      return { n, len };
+    }));
+  }
+  function schedule() {
+    while (nextT < ac.currentTime + 0.3) {
+      if (step === 0 && want !== mood) mood = want;
+      const song = SONGS[mood], e = 60 / song.bpm / 2, steps = parse(song);
+      const s = steps[step], bar = Math.floor(step / 8), inBar = step % 8;
+      if (s) tone(s.n, nextT, e * s.len * 0.95, { duty: song.duty, vol: 0.22, hold: 0.7, bus: musBus });
+      if (inBar % song.bassEvery === 0) {
+        const root = song.bass[bar], oct = song.bassEvery === 1 && inBar % 2 ? root.replace(/\d/, d => +d + 1) : root;
+        tone(oct, nextT, e * song.bassEvery * 0.9, { type: 'triangle', vol: 0.35, hold: 0.8, bus: musBus });
+      }
+      if (song.hat.indexOf(inBar) >= 0) noise(nextT, 0.03, { filter: 'highpass', f: 7000, vol: inBar === 0 ? 0.07 : 0.04, bus: musBus });
+      nextT += e;
+      step = (step + 1) % steps.length;
+    }
+  }
+  function startMusic() {
+    if (timer || !on.music || !unlocked) return;
+    musBus.gain.cancelScheduledValues(ac.currentTime);
+    musBus.gain.setValueAtTime(0.22, ac.currentTime);
+    step = 0; mood = want; nextT = ac.currentTime + 0.1;
+    timer = setInterval(schedule, 80);
+    schedule();
+  }
+  function stopMusic() {
+    if (!timer) return;
+    clearInterval(timer); timer = 0;
+    musBus.gain.setValueAtTime(musBus.gain.value, ac.currentTime);
+    musBus.gain.linearRampToValueAtTime(0, ac.currentTime + 0.2);
+  }
+
+  /** 第一次點畫面時呼叫（iPhone 一定要在點擊當下才能開聲音） */
+  function unlock() {
+    if (!ensure()) return;
+    if (ac.state !== 'running') ac.resume();
+    if (!unlocked) {
+      unlocked = true;
+      // 播一個無聲的音，iOS 才會真正打開音訊
+      const b = ac.createBufferSource(); b.buffer = ac.createBuffer(1, 1, 22050); b.connect(ac.destination); b.start(0);
+      startMusic();
+    }
+  }
+
+  return {
+    unlock, play,
+    get unlocked() { return unlocked; },
+    /** {sfx, music}：開關音效與音樂 */
+    set(o) {
+      Object.assign(on, o);
+      if (!ac) return;
+      if (on.music) startMusic(); else stopMusic();
+    },
+    /** 今天的漲跌（小數）→ 換對應的曲子，在下一輪開頭切換 */
+    setMood(p) { want = p > 0.0005 ? 'up' : p < -0.005 ? 'down' : 'flat'; },
+    pause() { if (ac && ac.state === 'running') ac.suspend(); },
+    resume() { if (ac && unlocked) ac.resume(); },
+  };
+})();
 </script>
 <script>
 // ═════════ 基本工具 ═════════
@@ -1449,6 +1693,8 @@ const S = {
   theme: store.get('theme', 'auto'),
   range: store.get('range', 'all'),
   quiet: store.get('quiet', false),
+  sfxOn: store.get('sfx', true),
+  musicOn: store.get('music', true),
   edit: null, showClosed: false, charts: [], loadedAt: 0,
 };
 
@@ -1578,6 +1824,7 @@ let toastT;
 function toast(msg) {
   const t = $('#toast'), bad = /^(出錯|讀取失敗|有欄位|至少|請)/.test(msg);
   t.innerHTML = '<img alt="" src="' + GUGU.miniURL({ face: bad ? 'worry' : 'happy', acc: bad ? 'question' : null, body: S.pet ? S.pet.body : 'normal' }) + '">' + esc(msg);
+  SFX.play(bad ? 'err' : 'ok');
   t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2600);
 }
 
@@ -1837,6 +2084,7 @@ function goalInfo() {
 // ═════════ 畫面切換 ═════════
 const TITLES = { home: '總覽', market: '市場', records: '紀錄', entry: '記一筆', analysis: '分析', settings: '設定' };
 function go(view, opts) {
+  if (view !== S.view) SFX.play('tab');
   if (view === 'entry') { S.edit = opts && opts.edit ? opts.edit : null; S.showClosed = false; }
   S.view = view;
   closeSheet();
@@ -2011,13 +2259,14 @@ function mountStage() {
   if (!cv) return;
   const stage = GUGU.mount(cv, {
     bubble: $('#gw-bubble'), heroEl: () => $('#hero'), leakEl: () => $('#today-body'),
-    onLongPress: openPetStatus, onTap: petTouched,
+    onLongPress: openPetStatus, onTap: petTouched, petLines: () => chatLines().slice(0, 6),
   });
   GW.stage = stage;
   stage.setTheme(darkNow() ? 'dark' : 'light');
   stage.setState(S.pet);
   stage.setFlags(S.flagsList);
   stage.setToday(S.D.mk.ok ? S.D.mk.pct : 0);
+  SFX.setMood(S.D.mk.ok ? S.D.mk.pct : 0);
   stage.start();
   if (S.D.newHigh && (S.fxPlayed === S.D.mk.date || store.get('fxPlayed', '') === S.D.mk.date)) stage.page.plantFlag($('#hero'));
   if (S.pendingEat) { S.pendingEat = false; setTimeout(() => stage.play('eat'), 400); setTimeout(() => talk(stage), 4000); return; }
@@ -2052,9 +2301,58 @@ function talk(stage) {
     const ds = D.latest ? days(D.latest.date, S.data.today) : 0;
     if (ds >= 21) lines.push(ds + ' 天沒記帳了，記一下嘛');
     if (st.nextLevel && st.nextLevel[0] - D.ath < 150000) lines.push('再 ' + wan(st.nextLevel[0] - D.ath) + ' 就能升級成「' + st.nextLevel[1] + '」！');
-    if (!lines.length) lines.push(pickOne(['今天也辛苦了', '摸摸我會變開心喔', '左右滑可以參觀我們家', '長按我可以看紀念冊']));
+    if (!lines.length) lines.push(pickOne(chatLines()));
   }
   stage.say(lines[0], 4.5);
+}
+/** 依時間、市場、目標和你的計畫挑台詞（越前面越貼近現在的情境） */
+function chatLines() {
+  const D = S.D, mk = D.mk, st = S.pet, l = [];
+  const now = new Date(Date.now() + 8 * 3600e3), h = now.getUTCHours(), wd = now.getUTCDay(), mo = now.getUTCMonth() + 1, dd = now.getUTCDate();
+  // 市場
+  if (marketOpenNow()) l.push(pickOne(['開盤中，我幫你盯著', '盤中每 20 秒更新一次喔', '盯盤不要太久，眼睛會累']));
+  else if (wd === 0 || wd === 6) l.push(pickOne(['週末不開盤，我們放假！', '週末適合出去走走', '今天市場休息，我也休息']));
+  else if (h >= 13 && h < 18) l.push(pickOne(['收盤了，今天辛苦了', '收盤囉，晚點我幫你把價格抓好']));
+  if (mk.ok && mk.pct >= 0.015) l.push(pickOne(['今天好棒！漲好多', '今天的我特別圓', '漲了！我請你喝珍奶（假的）']));
+  else if (mk.ok && mk.pct <= -0.015) l.push(pickOne(['跌了沒關係，長期來看會好的', '你說過大跌要加碼的喔', '風雨過後會有彩虹', '抱一下，明天再看']));
+  else if (mk.ok && mk.pct > 0.0005) l.push(pickOne(['小漲也是漲！', '今天有一點點甜']));
+  else if (mk.ok && mk.pct < -0.0005) l.push(pickOne(['小跌而已，不要緊', '今天有點涼，多穿一件']));
+  // 目標
+  const g = goalInfo();
+  if (g.goal && g.now) {
+    const left = g.goal.amount - g.now;
+    l.push(left > 0 ? pickOne(['今年目標完成 ' + Math.floor(g.now / g.goal.amount * 100) + '% 了！', '再 ' + wan(left) + ' 就達成「' + g.goal.name + '」']) : '今年目標已經達成！太強了');
+  }
+  if (st.nextLevel) l.push('再 ' + wan(st.nextLevel[0] - D.ath) + '，我們家就能變成「' + st.nextLevel[1] + '」');
+  // 時間
+  if (h >= 5 && h < 10) l.push(pickOne(['早安！今天也一起加油', '早餐吃了嗎？', '早起的股娃娃有金幣撿']));
+  else if (h >= 11 && h < 14) l.push(pickOne(['午餐時間！吃飽才有力氣', '中午了，休息一下吧']));
+  else if (h >= 14 && h < 18) l.push(pickOne(['下午容易想睡，伸個懶腰', '來杯下午茶？']));
+  else if (h >= 18 && h < 23) l.push(pickOne(['晚上好～今天過得怎樣？', '晚餐吃什麼呢？']));
+  else l.push(pickOne(['這麼晚了還沒睡？', '熬夜對身體不好，早點睡']));
+  if (wd === 1) l.push('星期一，慢慢來');
+  if (wd === 5) l.push('星期五了！週末快到了');
+  // 記帳與計畫
+  const ds = D.latest ? days(D.latest.date, S.data.today) : 0;
+  if (ds >= 14) l.push(ds + ' 天沒記帳了，我有點餓…');
+  if (dd >= 25) l.push('月底了，記得記帳喔');
+  if (mo === 1 || mo === 2) l.push('年終獎金入帳了嗎？記得餵我');
+  if (S.data.today < '2027-07') l.push('出國基金也要存喔 ✈️');
+  // 隨機小事與小知識（不給買賣建議）
+  l.push(pickOne([
+    '我今天有乖乖看家', '房子後面好像長了新的花', '我在練習倒立（失敗了）', '偷偷告訴你，我會一直陪著你',
+    '嗯…好像聞到金幣的味道', '我們的旗子越來越多了', '左右滑可以參觀我們家', '長按我可以看紀念冊', '連點我兩下，我會跳很高',
+    '0050 裡面有台灣最大的 50 家公司', '0050 正二每天的漲跌，大約是 0050 的兩倍', '基金淨值通常隔天才公布',
+    'ETF 就像一籃子股票做成的便當', '存錢就像種花，要慢慢等', '複利需要時間，我們有的是時間',
+  ]));
+  return l;
+}
+/** 待在總覽時，股娃娃偶爾自言自語 */
+function scheduleChatter() {
+  setTimeout(() => {
+    if (!S.quiet && S.view === 'home' && GW.stage && !GW.stage.state.scene && S.D && document.visibilityState === 'visible' && !$('#sheet').classList.contains('on')) GW.stage.say(pickOne(chatLines()), 4);
+    scheduleChatter();
+  }, 40000 + Math.random() * 30000);
 }
 function petTouched() {
   if (S.pet.lonely) { S.lonelyCleared = true; S.pet = petState(); if (GW.stage) GW.stage.setState(S.pet); }
@@ -2696,6 +2994,8 @@ function settingsView() {
     '<div style="display:grid;gap:14px;align-content:start">' +
     '<section class="card"><div class="card-h"><h2>' + GUGU.NAME + '</h2></div><div class="gw-status-h">' + mini({ face: 'happy' }, 'bob') + '<div><b style="font-size:17px">家園 Lv.' + S.pet.level + '：' + S.pet.levelName + '</b><span>紀念旗 ' + S.flagsList.length + ' 面</span></div></div>' +
     '<div class="switch-row"><span>安靜模式<br><small class="muted">不主動說話、不自動演出，點牠才會動</small></span><div class="seg" id="s-quiet"><button data-v="0" class="' + (!S.quiet ? 'on' : '') + '">活潑</button><button data-v="1" class="' + (S.quiet ? 'on' : '') + '">安靜</button></div></div>' +
+    '<div class="switch-row"><span>音效<br><small class="muted">漲跌、摸摸、走路的 8-bit 音效</small></span><div class="seg" id="s-sfx"><button data-v="1" class="' + (S.sfxOn ? 'on' : '') + '">開</button><button data-v="0" class="' + (!S.sfxOn ? 'on' : '') + '">關</button></div></div>' +
+    '<div class="switch-row"><span>背景音樂<br><small class="muted">依今天漲跌換曲；手機靜音時不會出聲</small></span><div class="seg" id="s-music"><button data-v="1" class="' + (S.musicOn ? 'on' : '') + '">開</button><button data-v="0" class="' + (!S.musicOn ? 'on' : '') + '">關</button></div></div>' +
     '<button class="btn small" id="gw-status-btn" style="margin-top:8px">看狀態與紀念冊</button></section>' +
     '<section class="card"><div class="card-h">' + icon('target', null, '#E5484D') + '<h2>年度目標</h2></div>' +
     '<label class="field"><span>年份</span><input class="input num" id="g-year" inputmode="numeric" value="' + g.year + '"></label>' +
@@ -2744,6 +3044,8 @@ function mountSettings() {
   segBind('#s-theme', v => { S.theme = v; store.set('theme', v); applyPrefs(); render(); });
   segBind('#s-hide', v => { S.hidden = v === '1'; store.set('hidden', S.hidden); render(); });
   segBind('#s-quiet', v => { S.quiet = v === '1'; store.set('quiet', S.quiet); render(); });
+  segBind('#s-sfx', v => { S.sfxOn = v === '1'; store.set('sfx', S.sfxOn); SFX.set({ sfx: S.sfxOn }); render(); });
+  segBind('#s-music', v => { S.musicOn = v === '1'; store.set('music', S.musicOn); SFX.set({ music: S.musicOn }); render(); });
   $('#gw-status-btn').onclick = openPetStatus;
 }
 function segBind(sel, fn) { $$(sel + ' button').forEach(b => b.onclick = () => fn(b.dataset.v)); }
@@ -2801,7 +3103,7 @@ function scheduleVisitor() {
       const v = $('#visitor');
       $('.gw-say', v).textContent = pickOne(lines);
       $('img', v).src = GUGU.miniURL({ face: 'happy', body: S.pet ? S.pet.body : 'normal' });
-      v.classList.add('on');
+      v.classList.add('on'); SFX.play('talk');
       setTimeout(() => v.classList.remove('on'), 5000);
     }
     scheduleVisitor();
@@ -2834,6 +3136,7 @@ function applyLive() {
     if (h && S.D.latest) h.outerHTML = heroInner(S.D.latest);
     if (tb) tb.innerHTML = todayBody();
     if (GW.stage) GW.stage.setToday(S.D.mk.ok ? S.D.mk.pct : 0);
+    SFX.setMood(S.D.mk.ok ? S.D.mk.pct : 0);
   } else if (S.view === 'market' && !$('#sheet').classList.contains('on')) {
     const y = window.scrollY; render(); window.scrollTo(0, y);
   }
@@ -2871,9 +3174,13 @@ function init() {
   $('#busy-img').src = GUGU.miniURL({ face: 'happy', walk: true });
   $('#visitor img').onclick = () => { $('#visitor').classList.remove('on'); go('home'); };
   scheduleVisitor();
+  scheduleChatter();
+  SFX.set({ sfx: S.sfxOn, music: S.musicOn });
+  ['pointerdown', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, SFX.unlock, { capture: true, passive: true }));
   setInterval(() => pollLive(false), LIVE_MS);
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState !== 'visible') return;
+    if (document.visibilityState !== 'visible') { SFX.pause(); return; }
+    SFX.resume();
     if (Date.now() - S.loadedAt > 5 * 60e3) load(false); else pollLive(true);
   });
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
