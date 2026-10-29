@@ -1765,11 +1765,9 @@ function computeMarket(d, recs, prices, live) {
     if (last.d > date) date = last.d;
   });
   const lives = holdings.filter(h => h.last.live);
-  // 盤中：還沒有今天價格的（基金淨值）不算進「今天」的漲跌，避免把前一天的變動混進來
-  if (lives.length) {
-    holdings.forEach(h => { if (!h.last.live) h.pending = true; });
-    change = holdings.filter(h => !h.pending).reduce((t, h) => t + h.change, 0);
-  }
+  // 基金淨值晚一天公布：最新價格不是最近交易日的，不算進「今天」，避免把前一天的漲跌混進來
+  holdings.forEach(h => { if (h.last.d < date) h.pending = true; });
+  change = holdings.filter(h => !h.pending).reduce((t, h) => t + h.change, 0);
   return { holdings, est, change, pct: holdings.length ? change / (est - change) : 0, date, ok: holdings.length > 0, newer: holdings.some(h => h.last.d > h.recDate),
     live: lives.length > 0, liveAt: lives.length ? lives.map(h => h.last.t).sort().pop() : '' };
 }
@@ -1904,21 +1902,21 @@ function todayBody() {
   let body;
   if (mk.ok) {
     const max = Math.max(...mk.holdings.filter(h => !h.pending).map(h => Math.abs(h.change)), 1);
-    const rows = mk.holdings.slice().sort((a, b) => (a.pending - b.pending) || Math.abs(b.change) - Math.abs(a.change)).map(h => {
-      if (h.pending) return '<div class="contrib-row"><span class="nm">' + esc(h.acc.name) + '</span><div class="cbar"></div><span class="amt muted" style="font-weight:500">淨值收盤後公布</span></div>';
+    const rows = mk.holdings.slice().sort((a, b) => (!!a.pending - !!b.pending) || Math.abs(b.change) - Math.abs(a.change)).map(h => {
+      if (h.pending) return '<div class="contrib-row"><span class="nm">' + esc(h.acc.name) + '</span><div class="cbar"></div><span class="amt muted" style="font-weight:500">' + (h.last.d < mk.date ? '今天的淨值還沒公布' : '淨值收盤後公布') + '</span></div>';
       const bar = '<i style="background:var(--' + (h.change >= 0 ? 'up' : 'down') + ');width:' + (Math.abs(h.change) / max * 50) + '%;' + (h.change >= 0 ? 'left:50%' : 'right:50%') + '"></i>';
       return '<div class="contrib-row"><span class="nm">' + esc(h.acc.name) + '</span><div class="cbar">' + bar + '</div>' +
         '<span class="amt num ' + dir(h.change) + '">' + signed(h.change) + '<small>' + (h.pct >= 0 ? '+' : '') + pct(h.pct, 2) + '</small></span></div>';
     }).join('');
     const eq = equiv(mk.change);
-    const lagged = mk.holdings.filter(h => h.last.d < mk.date && !h.pending).map(h => h.acc.name + ' 為 ' + shortD(h.last.d) + ' 淨值');
+    const lagged = mk.holdings.filter(h => h.pending).map(h => h.acc.name + ' 最新淨值是 ' + shortD(h.last.d) + '（' + signed(h.change) + '），基金淨值晚一天公布，不算進今天');
     const when = mk.live ? (marketOpenNow() ? '<i class="live-dot"></i>盤中即時 ' + mk.liveAt.slice(0, 5) : fmtD(mk.date) + ' 收盤') : fmtD(mk.date) + ' 收盤';
     body = '<div class="today-head"><h2>今天</h2><span>' + when + (S.D.streak >= 2 ? '，' + S.D.streak + ' 連漲' : S.D.streak <= -2 ? '，' + -S.D.streak + ' 連跌' : '') + '</span></div>' +
       '<div class="today-main"><span class="today-amt ' + dir(mk.change) + '">' + signed(mk.change) + '</span><span class="today-pct ' + dir(mk.change) + '">' + (mk.pct >= 0 ? '+' : '') + pct(mk.pct, 2) + '</span></div>' +
       '<p class="today-msg">' + moodMsg(mk) + '</p>' +
       (eq && !S.hidden ? '<p class="today-eq">' + (mk.change > 0 ? '賺了大約 ' : '少了大約 ') + eq + '</p>' : '') +
       '<div class="contrib">' + rows + '</div>' +
-      '<div class="today-foot">' + (lagged.length ? lagged.join('，') + '。' : '') + (mk.live ? '開盤時間每 20 秒更新一次，基金淨值收盤後才公布。' : '開盤時間打開會即時更新，收盤後以當天收盤價為準。') + '</div>';
+      '<div class="today-foot">' + (lagged.length ? lagged.join('，') + '。' : '') + (mk.live ? '開盤時間每 20 秒更新一次。' : '開盤時間打開會即時更新，收盤後以當天收盤價為準。') + '</div>';
   } else {
     body = '<div class="today-head"><h2>今天</h2></div><p class="sub" style="margin:6px 0 0">幫投資帳戶填上股價代號後，這裡會每天顯示資產漲跌。</p>';
   }
