@@ -389,6 +389,10 @@ button.ind:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--edge);
 .ind-v { font-family: var(--num); font-size: 30px; line-height: 1.05; letter-spacing: .02em; }
 .ind-d { font-size: 12px; font-weight: 700; }
 .spark { width: 100%; height: 30px; margin-top: 6px; }
+/* 資料健康提醒 */
+.health { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 14px; border: 2px solid var(--ink); box-shadow: 3px 3px 0 #FFC94A; border-radius: 0; font-size: 13px; font-weight: 650; color: var(--text); }
+.health .mini { width: 28px; height: auto; flex: none; }
+.health .more { margin-left: auto; color: var(--muted); font-weight: 500; white-space: nowrap; }
 /* 資產配置甜甜圈 */
 .alloc-wrap { display: grid; grid-template-columns: 136px minmax(0, 1fr); gap: 18px; align-items: center; margin-top: 4px; }
 .donut { position: relative; width: 136px; height: 136px; }
@@ -2179,7 +2183,7 @@ function bindRange() {
 function homeView() {
   const { latest } = S.D;
   if (!latest) return '<div class="card empty">' + mini({ face: 'happy' }, 'bob') + '還沒有任何紀錄，按下方「＋」記第一筆吧。</div>';
-  return '<div class="grid">' + heroCard(latest) + todayCard() + goalCard() + investCard() +
+  return '<div class="grid">' + heroCard(latest) + healthCard() + todayCard() + goalCard() + investCard() +
     '<section class="card span2"><div class="card-h">' + icon('chart') + '<h2>總資產走勢</h2>' + rangeSeg() + '</div><div class="chart tall"><canvas id="c-trend"></canvas></div></section>' +
     allocCard(latest) + accountsCard(latest) + '</div>';
 }
@@ -2301,6 +2305,8 @@ function mountHome() {
     },
   }));
   $$('[data-acc]').forEach(b => b.onclick = () => openAccount(b.dataset.acc));
+  const hb = $('#health-btn');
+  if (hb) hb.onclick = openHealth;
   const gg = $('[data-go-goal]');
   if (gg) gg.onclick = () => go('settings');
   mountStage();
@@ -2377,6 +2383,7 @@ function chatLines() {
     l.push(left > 0 ? pickOne(['今年目標完成 ' + Math.floor(g.now / g.goal.amount * 100) + '% 了！', '再 ' + wan(left) + ' 就達成「' + g.goal.name + '」']) : '今年目標已經達成！太強了');
   }
   if (st.nextLevel) l.push('再 ' + wan(st.nextLevel[0] - D.ath) + '，我們家就能變成「' + st.nextLevel[1] + '」');
+  if (dataHealth().length) l.unshift('股價好像沒更新到最新，點上面的提醒看看');
   // 時間
   if (h >= 5 && h < 10) l.push(pickOne(['早安！今天也一起加油', '早餐吃了嗎？', '早起的股娃娃有金幣撿']));
   else if (h >= 11 && h < 14) l.push(pickOne(['午餐時間！吃飽才有力氣', '中午了，休息一下吧']));
@@ -3149,10 +3156,60 @@ function settingsView() {
     priceStatusCard() +
     '</div></div>';
 }
+/** 代號 → 你看得懂的名稱（帳戶名稱或指標名稱） */
+function codeName(code) {
+  const a = S.data.accounts.find(x => x.code === code);
+  return a ? a.name : IND_META[code] ? IND_META[code].name : code;
+}
+/**
+ * 資料健康：自動更新有沒有在跑、哪些價格落後。
+ * 落後是跟其他持股的最新日期比，不是跟日曆比，所以遇到連假不會誤報。
+ */
+function dataHealth() {
+  const st = S.data.priceStatus, out = [];
+  if (!st) return out;
+  const hrs = (Date.now() - Date.parse(st.at.replace(' ', 'T') + ':00+08:00')) / 3600e3;
+  if (hrs > 26) out.push('股價自動更新已經 ' + Math.floor(hrs) + ' 小時沒有跑');
+  const last = s => (s && s.d.length ? s.d[s.d.length - 1] : '');
+  const held = S.data.accounts.filter(a => a.status === '使用中' && a.code).map(a => a.code);
+  const stockDays = [...new Set(held.filter(c => !/:FO$/.test(c)).map(c => last(S.data.prices[c])).filter(Boolean))].sort();
+  const newest = stockDays[stockDays.length - 1];
+  if (!newest) return out;
+  // 基金淨值本來就晚一天，所以基金容許落後一個交易日
+  const tradeDays = [...new Set([].concat(...held.map(c => (S.data.prices[c] || { d: [] }).d)))].sort();
+  const dayBefore = tradeDays[tradeDays.indexOf(newest) - 1] || newest;
+  held.forEach(c => {
+    const d = last(S.data.prices[c]);
+    if (d && d < (/:FO$/.test(c) ? dayBefore : newest)) out.push(codeName(c) + ' 的價格停在 ' + shortD(d));
+  });
+  ['TAIEX', '2330', 'FOREIGN'].forEach(id => {
+    const d = last((S.data.indicators || {})[id]);
+    if (d && d < newest) out.push(codeName(id) + '（市場頁）停在 ' + shortD(d));
+  });
+  return out;
+}
+function healthCard() {
+  const issues = dataHealth();
+  if (!issues.length) return '';
+  return '<button class="card health span2" id="health-btn">' + mini({ face: 'worry', acc: 'question' }) + '<span>' + esc(issues[0]) + (issues.length > 1 ? '，還有 ' + (issues.length - 1) + ' 項' : '') + '</span><span class="more">看原因</span></button>';
+}
+function openHealth() {
+  const issues = dataHealth();
+  openSheet('<div class="sheet-h">' + mini({ face: 'worry', acc: 'question' }) + '<h3>資料有狀況</h3><button class="icon-btn" data-close aria-label="關閉">' + icon('x', 'inv') + '</button></div>' +
+    '<ul class="gw-log" style="margin:0 0 12px">' + issues.map(t => '<li><i style="background:#FFC94A"></i><span>' + esc(t) + '</span></li>').join('') + '</ul>' +
+    '<p class="sub" style="margin:0 0 14px;line-height:1.75">股價是自動從證交所和 Yahoo 抓的公開資料，偶爾會失敗。失敗時 App 會先用最後一次抓到的價格，所以總資產和「今天」可能不是最新的。通常下一次自動更新（每天 8、15、21 點）就會補上；如果連續兩天都這樣，跟 Claude 說一聲。</p>' +
+    priceStatusBody());
+}
+function priceStatusBody() {
+  const st = S.data.priceStatus;
+  // 把紀錄裡的代號換成名稱，「證交所失敗，改用 Yahoo」代表備援有在運作
+  const pretty = l => l.replace(/^(指標 )?(\S+)/, (m, ind, code) => (ind || '') + codeName(code));
+  return st ? '<p class="sub" style="margin:0 0 8px;font-size:14px">上次自動更新：' + esc(st.at) + '</p><div class="list">' + st.log.map(l => '<div class="row" style="padding:7px 4px;font-size:13px">' + esc(pretty(l)) + '</div>').join('') + '</div>' : '';
+}
 function priceStatusCard() {
   const st = S.data.priceStatus;
   const body = st
-    ? '<p class="sub" style="margin:0 0 8px;font-size:14px">上次更新：' + esc(st.at) + '</p><div class="list">' + st.log.map(l => '<div class="row" style="padding:7px 4px;font-size:13px">' + esc(l) + '</div>').join('') + '</div>'
+    ? priceStatusBody()
     : '<p class="sub" style="margin:0;font-size:14px">還沒開始自動更新。請在 Apps Script 編輯器選「Market.gs」，執行「setupDaily」一次。</p>';
   return '<section class="card"><div class="card-h">' + icon('refresh') + '<h2>股價自動更新</h2></div>' + body + '</section>';
 }
