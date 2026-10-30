@@ -2535,9 +2535,12 @@ function exposure() {
   mk.holdings.forEach(h => { e += h.value * (h.acc.code === '00631L' ? 2 : 1); });
   return e / mk.est;
 }
+const US_IND = ['^SOX', '^GSPC', '^IXIC', '^VIX'];
 function indSeries(id) {
   const s = (S.data.indicators || {})[id];
-  const q = S.live && S.live.quotes && S.live.quotes[id];
+  const q = (S.live && S.live.quotes && S.live.quotes[id]) || (S.usLive && S.usLive.quotes[id]);
+  // 試算表裡已經有今天的值（例如盤中存到的半天資料）時，用即時報價取代它
+  if (q && s && q.d === s.d[s.d.length - 1]) { const v = s.v.slice(); v[v.length - 1] = q.p; return { d: s.d, v, live: q.t }; }
   if (q && (!s || q.d > s.d[s.d.length - 1])) {
     const base = s || { d: [], v: [] };
     const d = base.d.concat(q.d), v = base.v.concat(q.p);
@@ -2583,7 +2586,7 @@ function marketView() {
     // VIX、匯率的漲跌好壞不直觀，用中性色只看箭頭
     const cls = m.flow ? dir(ch) : m.calm || m.fx ? 'flat' : dir(ch);
     html += '<button class="ind card" data-ind="' + id + '"><div class="ind-n">' + m.name + '</div><div class="ind-v">' + m.fmt(last) + '</div>' +
-      '<div class="ind-d ' + cls + '">' + (m.flow ? (ch >= 0 ? '買超' : '賣超') : (ch >= 0 ? '▲ ' : '▼ ') + pct(Math.abs(ch), 2)) + '<span class="muted"> ' + (s.live && marketOpenNow() ? '盤中 ' + s.live.slice(0, 5) : shortD(s.d[n - 1])) + '</span></div>' +
+      '<div class="ind-d ' + cls + '">' + (m.flow ? (ch >= 0 ? '買超' : '賣超') : (ch >= 0 ? '▲ ' : '▼ ') + pct(Math.abs(ch), 2)) + '<span class="muted"> ' + (s.live && (US_IND.includes(id) ? usOpenNow() : marketOpenNow()) ? '盤中 ' + s.live.slice(0, 5) : shortD(s.d[n - 1])) + '</span></div>' +
       '<canvas class="spark" data-spark="' + id + '" aria-hidden="true"></canvas></button>';
   });
   html += '</div>';
@@ -2625,6 +2628,8 @@ function overviewHtml(body) {
   return html + '</div>';
 }
 function mountMarket() {
+  // 進市場頁時抓一次美股（收盤後還沒存進試算表的那一天也看得到）
+  if (!S.usLiveAt || Date.now() - S.usLiveAt > 60e3) pollUs(true);
   $$('[data-spark]').forEach(cv => {
     const s = indSeries(cv.dataset.spark);
     if (!s) return;
@@ -3320,6 +3325,25 @@ async function pollLive(force) {
     if (!S.liveTried) { S.liveTried = true; if (S.view === 'home' && GW.stage && S.fresh) autoplay(GW.stage); }
   }
 }
+/** 美股開盤（紐約時間週一到五 9:30–16:00，夏令／冬令時間自動換算） */
+function usOpenNow() {
+  const p = {};
+  new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+    .formatToParts(new Date()).forEach(x => { p[x.type] = x.value; });
+  const m = +p.hour * 60 + +p.minute;
+  return p.weekday !== 'Sat' && p.weekday !== 'Sun' && m >= 9 * 60 + 30 && m <= 16 * 60 + 5;
+}
+/** 美股指數：開盤時每分鐘抓一次；只影響市場頁 */
+async function pollUs(force) {
+  if (!S.data || S.data.needsSetup || S.usBusy || document.visibilityState !== 'visible') return;
+  if (!force && !usOpenNow()) return;
+  S.usBusy = true; S.usLiveAt = Date.now();
+  try {
+    S.usLive = await api('getUsQuotes');
+    if (S.view === 'market' && !$('#sheet').classList.contains('on')) { const y = window.scrollY; render(); window.scrollTo(0, y); }
+  } catch (e) { /* 失敗就等下一次 */ }
+  finally { S.usBusy = false; }
+}
 /** 只更新數字，不整頁重畫（股娃娃的演出不會被打斷） */
 function applyLive() {
   if (!S.D) return;
@@ -3372,6 +3396,7 @@ function init() {
   SFX.set({ sfx: S.sfxOn, music: S.musicOn });
   ['pointerdown', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, SFX.unlock, { capture: true, passive: true }));
   setInterval(() => pollLive(false), LIVE_MS);
+  setInterval(() => pollUs(false), 60e3);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') { SFX.pause(); return; }
     SFX.resume();
